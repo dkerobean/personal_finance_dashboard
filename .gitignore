@@ -1,0 +1,133 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+/media
+/static
+*.env
+
+# Django migrations
+*/migrations/*
+*.mo
+*.pickle
+
+# If your build process includes running collectstatic, then you probably don't need or want to include staticfiles.
+# By default Django stores them in a directory called staticfiles, but you can customize that.
+# Comment this out if you're not using Django Staticfiles or don't want to customize the folder.
+staticfiles/
+
+# Gunicorn artifact
+gunicorn.log
+
+# Ignore all local and project-specific virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ignore local system files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.orig
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# pipenv
+Pipfile.lock
+
+# Node modules
+node_modules/
+
+# NPM error log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+/frontend/build/
+frontend/node_modules
+
+# Coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+cover/
+.pytest_cache/v/* # cache files written by pytest
+.coverage # coverage tool config
+
+# Environments
+.env
+.env.*
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# System Files
+.DS_Store
+
+# Sublime Text
+*.sublime*
+
+# Pycharm
+.idea/
+*.iml
+
+# Visual Studio Code
+.vscode/
+.history/
+
+# Yarn
+.yarn/
+.pnp.*
+
+# TypeScript
+*.tsbuildinfo

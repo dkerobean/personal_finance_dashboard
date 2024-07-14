@@ -8,7 +8,7 @@ from . import views
 urlpatterns = [
     path('register/', views.RegistrationAPIView.as_view(), name="user-register"),
     path('logout/', views.LogoutAPIView.as_view(), name="user-logout"),
-    # path('logout/', views.LogoutView.as_view(), name="logout"),
+    path('test/', views.TestView.as_view(), name="test"),
 
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

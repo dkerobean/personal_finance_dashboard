@@ -14,6 +14,15 @@ class RegistrationAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class TestView(APIView):
+    def get(self, request):
+        print("connection is established")
+        return Response(
+            {"message": "Connection is established"},
+            status=status.HTTP_200_OK
+        )
+
+
 class LogoutAPIView(APIView):
     def post(self, request):
         try:

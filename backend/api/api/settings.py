@@ -65,6 +65,7 @@ AUTHENTICATION_BACKENDS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.token_blacklist.authentication.BlacklistAuthentication',
     ],
 }
 

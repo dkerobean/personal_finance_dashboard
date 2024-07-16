@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AuthImage from '../images/auth-image.jpg';
 import AuthDecoration from '../images/auth-decoration.png';
 
@@ -8,7 +10,7 @@ function Signin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
-  const [authError, setAuthError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const validateInputs = () => {
@@ -32,21 +34,28 @@ function Signin() {
       return;
     }
 
+    setIsLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/login/`, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/token/`, {
         email,
         password,
       });
       localStorage.setItem('access_token', response.data.access);
       localStorage.setItem('refresh_token', response.data.refresh);
-      navigate('/');
+      toast.success('Login successful!');
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
     } catch (error) {
-      setAuthError('Authentication failed. Please check your credentials and try again.');
+      toast.error('Authentication failed. Please check your credentials and try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <main className="bg-white">
+      <ToastContainer />
       <div className="relative md:flex">
         <div className="md:w-1/2">
           <div className="min-h-screen h-full flex flex-col after:flex-1">
@@ -105,12 +114,15 @@ function Signin() {
                   <div className="mr-1">
                     <Link className="text-sm underline hover:no-underline" to="/reset-password">Forgot Password?</Link>
                   </div>
-                  <button className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3" type="submit">
-                    Sign In
+                  <button
+                    className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3"
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Signing in...' : 'Sign In'}
                   </button>
                 </div>
               </form>
-              {authError && <p className="text-red-500 text-xs mt-1">{authError}</p>}
               <div className="pt-5 mt-6 border-t border-slate-200">
                 <div className="text-sm">
                   Don’t you have an account? <Link className="font-medium text-indigo-500 hover:text-indigo-600" to="/signup">Sign Up</Link>

@@ -31,6 +31,8 @@ function Signup() {
     }
     if (!formData.password) {
       errors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters long';
     }
     if (formData.password !== formData.confirm_password) {
       errors.confirm_password = 'Passwords do not match';
@@ -57,13 +59,22 @@ function Signup() {
 
     setIsLoading(true);
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/register/`, formData);
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/register/`, formData);
       toast.success('Signup successful!');
       setTimeout(() => {
         navigate('/');
       }, 1000);
     } catch (error) {
-      toast.error('Signup failed. Please try again.');
+      if (error.response && error.response.data) {
+        const { email } = error.response.data;
+        if (email) {
+          toast.error("User with this email already registered");
+        } else {
+          toast.error('Signup failed. Please try again.');
+        }
+      } else {
+        toast.error('Signup failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

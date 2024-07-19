@@ -6,13 +6,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['country', 'email', 'password', 'confirm_password']
+        fields = ['username', 'email', 'password', 'confirm_password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
         """ validate password and password confirmation fields match """
         password = data.get('password')
         confirm_password = data.pop('confirm_password', None)
+
+        if CustomUser.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError("Email already exists.")
+
+        return data
 
         if password != confirm_password:
             raise serializers.ValidationError("Passwords do not match.")
@@ -24,7 +29,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
-            country=validated_data['country'],
+            username=validated_data['username'],
             password=validated_data['password']
         )
         return user

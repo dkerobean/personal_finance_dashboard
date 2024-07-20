@@ -39,12 +39,28 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'email', 'username']
+        read_only_fields = ['email']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
-    # email = serializers.EmailField(source='user.email')
+
     class Meta:
         model = Profile
-        fields = ['profile_id', 'full_name', 'date_of_birth', 'address', 'phone_number', 'currency_symbol', 'user']
-        read_only_fields = ['user', 'profile_id']
+        fields = ['profile_id', 'full_name', 'date_of_birth', 'address',
+                  'phone_number', 'currency_symbol', 'user']
+        read_only_fields = ['profile_id']
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+
+        if user_data:
+            user_serializer = CustomUserSerializer(instance.user,
+                                                   data=user_data,
+                                                   partial=True)
+            if user_serializer.is_valid():
+                user_serializer.save()
+            else:
+                raise serializers.ValidationError(user_serializer.errors)
+
+        return super().update(instance, validated_data)

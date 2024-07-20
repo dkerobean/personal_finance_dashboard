@@ -49,3 +49,16 @@ class UserProfileView(APIView):
         serializer = UserProfileSerializer(profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def put(self, request):
+        profile = request.user.profile
+
+        if request.user != profile.user:
+            return Response({"detail": "You do not have permission to perform this action."}, # noqa
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserProfileSerializer(profile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

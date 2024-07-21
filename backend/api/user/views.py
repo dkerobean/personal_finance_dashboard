@@ -42,7 +42,7 @@ class LogoutAPIView(APIView):
 
 
 class UserProfileView(APIView):
-    permision_classes = IsAuthenticated
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         profile = request.user.profile
@@ -53,12 +53,13 @@ class UserProfileView(APIView):
         profile = request.user.profile
 
         if request.user != profile.user:
-            return Response({"detail": "You do not have permission to perform this action."}, # noqa
+            return Response({"detail": "You do not have permission to perform this action."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserProfileSerializer(profile, data=request.data)
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 

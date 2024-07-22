@@ -57,3 +57,64 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class IncomeCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class ExpenseCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Income(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='incomes')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.ForeignKey(IncomeCategory, on_delete=models.SET_NULL, null=True, related_name='incomes')
+    source = models.CharField(max_length=100)
+    date = models.DateField()
+    description = models.TextField(blank=True, null=True)
+
+
+class Expense(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='expenses')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='expenses')
+    date = models.DateField()
+    description = models.TextField(blank=True, null=True)
+
+
+class Budget(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='budgets')
+    category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='budgets')
+    target_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    spent_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    @property
+    def remaining_amount(self):
+        return self.target_amount - self.spent_amount
+
+
+class NetWorth(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='net_worths')
+    date = models.DateField(auto_now_add=True)
+    net_worth = models.DecimalField(max_digits=15, decimal_places=2)
+
+    @classmethod
+    def calculate_net_worth(cls, user):
+        total_income = sum(income.amount for income in user.incomes.all())
+        total_expenses = sum(expense.amount for expense in user.expenses.all())
+        net_worth = total_income - total_expenses
+        net_worth_record = cls.objects.create(user=user, net_worth=net_worth)
+        return net_worth_record
+

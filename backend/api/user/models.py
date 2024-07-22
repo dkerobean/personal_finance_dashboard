@@ -54,6 +54,7 @@ class Profile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     currency_symbol = models.CharField(max_length=5, default='₵', null=True,
                                        blank=True)
+    net_worth = models.DecimalField(max_digits=15, decimal_places=2, default=0)
 
     def __str__(self):
         return self.user.username

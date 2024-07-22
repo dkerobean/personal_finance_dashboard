@@ -48,7 +48,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['profile_id', 'full_name', 'date_of_birth', 'address',
-                  'phone_number', 'currency_symbol', 'user']
+                  'phone_number', 'currency_symbol', 'user', 'net_worth']
         read_only_fields = ['profile_id']
 
     def update(self, instance, validated_data):

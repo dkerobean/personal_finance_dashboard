@@ -1,8 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Transition from '../utils/Transition';
 
 import UserAvatar from '../images/user-avatar-32.png';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { fetchUserProfile } from '../utils/UserProfile';
 
 function DropdownProfile({
   align
@@ -10,8 +14,25 @@ function DropdownProfile({
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const [userProfile, setUserProfile] = useState(null);
+   const navigate = useNavigate();
+
+    useEffect(() => {
+    fetchUserProfile()
+      .then(profile => setUserProfile(profile))
+      .catch(error => {
+        console.log("Failed to fetch user profile:", error);
+        navigate('/signin');
+      });
+  }, [navigate]);
+
+
+
   const trigger = useRef(null);
   const dropdown = useRef(null);
+
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   // close on click outside
   useEffect(() => {
@@ -23,6 +44,31 @@ function DropdownProfile({
     document.addEventListener('click', clickHandler);
     return () => document.removeEventListener('click', clickHandler);
   });
+
+  // Logout
+
+  const handleLogout = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token');
+      await axios.post(`${backendUrl}/user/logout/`, {
+        refreshToken: refreshToken
+      });
+
+      toast.success('Logged out');
+
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+      console.log('logged out');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+
+      navigate('/signin');
+
+    } catch (error) {
+      toast.error("Error signing out: " + error.message);
+    }
+  }
 
   // close if the esc key is pressed
   useEffect(() => {
@@ -36,6 +82,7 @@ function DropdownProfile({
 
   return (
     <div className="relative inline-flex">
+    <ToastContainer />
       <button
         ref={trigger}
         className="inline-flex justify-center items-center group"
@@ -45,7 +92,7 @@ function DropdownProfile({
       >
         <img className="w-8 h-8 rounded-full" src={UserAvatar} width="32" height="32" alt="User" />
         <div className="flex items-center truncate">
-          <span className="truncate ml-2 text-sm font-medium group-hover:text-slate-800">Acme Inc.</span>
+          <span className="truncate ml-2 text-sm font-medium group-hover:text-slate-800">{userProfile ? userProfile.user.username : ''}</span>
           <svg className="w-3 h-3 shrink-0 ml-1 fill-current text-slate-400" viewBox="0 0 12 12">
             <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
           </svg>
@@ -68,27 +115,26 @@ function DropdownProfile({
           onBlur={() => setDropdownOpen(false)}
         >
           <div className="pt-0.5 pb-2 px-3 mb-1 border-b border-slate-200">
-            <div className="font-medium text-slate-800">Acme Inc.</div>
+            <div className="font-medium text-slate-800">{userProfile ? userProfile.user.username : ''}</div>
             <div className="text-xs text-slate-500 italic">Administrator</div>
           </div>
           <ul>
             <li>
               <Link
                 className="font-medium text-sm text-indigo-500 hover:text-indigo-600 flex items-center py-1 px-3"
-                to="/settings"
+                to="/settings/account/"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 Settings
               </Link>
             </li>
             <li>
-              <Link
+              <button
                 className="font-medium text-sm text-indigo-500 hover:text-indigo-600 flex items-center py-1 px-3"
-                to="/signin"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+                onClick={handleLogout}
               >
                 Sign Out
-              </Link>
+              </button>
             </li>
           </ul>
         </div>

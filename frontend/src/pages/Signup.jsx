@@ -60,9 +60,9 @@ function Signup() {
     setIsLoading(true);
     try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/register/`, formData);
-      toast.success('Signup successful!');
+      toast.success('Signup successful! Log in to continue');
       setTimeout(() => {
-        navigate('/');
+        navigate('/signin');
       }, 1000);
     } catch (error) {
       if (error.response && error.response.data) {

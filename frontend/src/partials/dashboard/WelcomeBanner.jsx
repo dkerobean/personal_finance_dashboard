@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchUserProfile } from '../../utils/UserProfile';
+import { useNavigate } from 'react-router-dom';
 
 function WelcomeBanner() {
+  const [userProfile, setUserProfile] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchUserProfile()
+      .then(profile => setUserProfile(profile))
+      .catch(error => {
+        console.log("Failed to fetch user profile:", error);
+        navigate('/signin');
+      });
+  }, [navigate]);
+
+
   return (
     <div className="relative bg-indigo-200 p-4 sm:p-6 rounded-sm overflow-hidden mb-8">
-
       {/* Background illustration */}
       <div className="absolute right-0 top-0 -mt-4 mr-16 pointer-events-none hidden xl:block" aria-hidden="true">
         <svg width="319" height="198" xmlnsXlink="http://www.w3.org/1999/xlink">
@@ -48,10 +62,11 @@ function WelcomeBanner() {
 
       {/* Content */}
       <div className="relative">
-        <h1 className="text-2xl md:text-3xl text-slate-800 font-bold mb-1">Good afternoon, Acme Inc. 👋</h1>
-        <p>Here is what’s happening with your projects today:</p>
+        <h1 className="text-2xl md:text-3xl text-slate-800 font-bold mb-1">
+          Good afternoon, {userProfile ? userProfile.full_name : ''}👋
+        </h1>
+        <p>Here is what’s happening with your finances today:</p>
       </div>
-
     </div>
   );
 }

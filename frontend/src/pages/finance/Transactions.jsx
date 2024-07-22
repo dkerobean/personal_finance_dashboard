@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Sidebar from '../../partials/Sidebar';
 import Header from '../../partials/Header';
@@ -7,6 +10,8 @@ import SearchForm from '../../partials/actions/SearchForm';
 import DropdownTransaction from '../../components/DropdownTransaction';
 import TransactionsTable from '../../partials/finance/TransactionsTable';
 import PaginationClassic from '../../components/PaginationClassic';
+import { useAuthCheck } from '../../utils/Auth';
+import { fetchUserProfile } from '../../utils/UserProfile';
 
 function Transactions() {
 
@@ -16,6 +21,30 @@ function Transactions() {
   const handleSelectedItems = (selectedItems) => {
     setSelectedItems([...selectedItems]);
   };
+
+  // Check auth and fetch user profile
+
+  const [userProfile, setUserProfile] = useState(null);
+  const loading = useAuthCheck();
+  const navigate = useNavigate();
+
+ useEffect(() => {
+    if (!loading) {
+      fetchUserProfile()
+        .then(profile => setUserProfile(profile))
+        .catch(error => {
+          toast.error("Failed to fetch user profile");
+          console.log("Failed to fetch user profile:", error);
+          navigate('/signin');
+        });
+    }
+  }, [loading, navigate]);
+
+  if (loading) {
+    return null;
+  }
+
+  const currency = userProfile ? userProfile.currency_symbol : "$";
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -39,7 +68,7 @@ function Transactions() {
 
               {/* Left: Title */}
               <div className="mb-4 sm:mb-0">
-                <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">$47,347.09</h1>
+                <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">{currency}{userProfile ? userProfile.net_worth: '0.00'}</h1>
               </div>
 
               {/* Right: Actions */}
@@ -57,7 +86,7 @@ function Transactions() {
                 <button className="btn bg-indigo-500 hover:bg-indigo-600 text-white">Export Transactions</button>
 
               </div>
-              
+
             </div>
 
             <div className="mb-5">
@@ -75,24 +104,19 @@ function Transactions() {
                 </li>
                 <li className="m-1">
                   <button className="inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out">
-                    Completed
+                    Income
                   </button>
                 </li>
                 <li className="m-1">
                   <button className="inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out">
-                    Pending
-                  </button>
-                </li>
-                <li className="m-1">
-                  <button className="inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out">
-                    Canceled
+                    Expense
                   </button>
                 </li>
               </ul>
             </div>
 
             {/* Table */}
-            <TransactionsTable selectedItems={handleSelectedItems} />
+            <TransactionsTable selectedItems={handleSelectedItems} profile={userProfile} />
 
             {/* Pagination */}
             <div className="mt-8">

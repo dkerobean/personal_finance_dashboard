@@ -83,6 +83,9 @@ class Income(models.Model):
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return str(self.amount)
+
 
 class Expense(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='expenses')
@@ -90,6 +93,9 @@ class Expense(models.Model):
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='expenses')
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return str(self.amount)
 
 
 class Budget(models.Model):

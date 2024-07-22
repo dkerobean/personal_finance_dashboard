@@ -38,3 +38,32 @@ class ExpenseView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TransactionsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        income_query = Income.objects.filter(user=user)
+        expense_query = Expense.objects.filter(user=user)
+
+        # Filtering
+        filter_type = request.query_params.get('type')
+        if filter_type == 'income':
+            expenses = []
+            incomes = income_query
+        elif filter_type == 'expense':
+            incomes = []
+            expenses = expense_query
+        else:
+            incomes = income_query
+            expenses = expense_query
+
+        income_serializer = IncomeSerializer(incomes, many=True)
+        expense_serializer = ExpenseSerializer(expenses, many=True)
+
+        return Response({
+            'incomes': income_serializer.data,
+            'expenses': expense_serializer.data
+        })

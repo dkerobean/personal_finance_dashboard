@@ -83,6 +83,7 @@ class Income(models.Model):
     source = models.CharField(max_length=100)
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
+    transaction_type = models.CharField(max_length=20, default='income', null=True)
 
     def __str__(self):
         return str(self.amount)
@@ -94,6 +95,7 @@ class Expense(models.Model):
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='expenses')
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
+    transaction_type = models.CharField(max_length=20, default='expense', null=True)
 
     def __str__(self):
         return str(self.amount)

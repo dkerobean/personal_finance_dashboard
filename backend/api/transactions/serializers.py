@@ -21,6 +21,12 @@ class IncomeSerializer(serializers.ModelSerializer):
         model = Income
         fields = ['amount', 'category', 'source', 'date', 'description', 'user', 'transaction_type']
 
+    def create(self, validated_data):
+        category_data = validated_data.pop('category')
+        category, created = IncomeCategory.objects.get_or_create(**category_data)
+        income = Income.objects.create(category=category, **validated_data)
+        return income
+
 
 class ExpenseSerializer(serializers.ModelSerializer):
     category = ExpenseCategorySerializer()
@@ -28,3 +34,9 @@ class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
         fields = ['user', 'amount', 'category', 'date', 'description', 'transaction_type']
+
+    def create(self, validated_data):
+        category_data = validated_data.pop('category')
+        category, created = ExpenseCategory.objects.get_or_create(**category_data)
+        expense = Expense.objects.create(category=category, **validated_data)
+        return expense

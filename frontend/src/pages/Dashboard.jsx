@@ -21,6 +21,7 @@ import DashboardCard09 from '../partials/dashboard/DashboardCard09';
 import DashboardCard10 from '../partials/dashboard/DashboardCard10';
 import DashboardCard11 from '../partials/dashboard/DashboardCard11';
 import FintechIntro from '../partials/fintech/FintechIntro';
+
 import { fetchUserProfile } from '../utils/UserProfile';
 import { useAuthCheck } from '../utils/Auth';
 

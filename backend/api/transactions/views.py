@@ -1,11 +1,25 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import IncomeSerializer, ExpenseSerializer
+from .serializers import IncomeSerializer, ExpenseSerializer, IncomeCategorySerializer, ExpenseCategorySerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import IsAuthenticated
-from user.models import Income, Expense
+from user.models import Income, Expense, IncomeCategory, ExpenseCategory
+
+
+class IncomeCategoryView(APIView):
+    def get(self, request):
+        income_categories = IncomeCategory.objects.all()
+        serializer = IncomeCategorySerializer(income_categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ExpenseCategoryView(APIView):
+    def get(self, request):
+        expense_categories = ExpenseCategory.objects.all()
+        serializer = ExpenseCategorySerializer(expense_categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class IncomeView(APIView):
@@ -14,7 +28,7 @@ class IncomeView(APIView):
     def get(self, request):
         incomes = Income.objects.all()
         serializer = IncomeSerializer(incomes, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = IncomeSerializer(data=request.data)
@@ -30,7 +44,7 @@ class ExpenseView(APIView):
     def get(self, request):
         expenses = Expense.objects.all()
         serializer = ExpenseSerializer(expenses, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = ExpenseSerializer(data=request.data)

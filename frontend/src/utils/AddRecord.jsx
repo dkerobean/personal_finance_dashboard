@@ -13,12 +13,14 @@ export function AddRecord() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [incomeSource, setIncomeSource] = useState('');
-
+  const [incomeCategories, setIncomeCategories] = useState([]);
+  const [expenseCategories, setExpenseCategories] = useState([]);
   const [userId, setUserId] = useState('');
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const token = localStorage.getItem('access_token');
 
-  // fetch user profile
-
+  // Fetch user profile
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -32,11 +34,27 @@ export function AddRecord() {
     getUserProfile();
   }, []);
 
-  console.log(userId)
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const [incomeResponse, expenseResponse] = await Promise.all([
+          axios.get(`${backendUrl}/transactions/income/category/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`${backendUrl}/transactions/expense/category/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+        setIncomeCategories(incomeResponse.data);
+        setExpenseCategories(expenseResponse.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
 
-
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const token = localStorage.getItem('access_token');
+    fetchCategories();
+  }, [backendUrl, token]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +66,7 @@ export function AddRecord() {
     };
 
     if (transactionType === 'income') {
-      data.category = { name: category }; // Match serializer structure
+      data.category = { name: category };
       data.source = incomeSource;
 
       await axios.post(`${backendUrl}/transactions/income/`, data, {
@@ -62,7 +80,7 @@ export function AddRecord() {
           console.log(error);
         });
     } else {
-      data.category = { name: category }; // Match serializer structure
+      data.category = { name: category };
 
       await axios.post(`${backendUrl}/transactions/expense/`, data, {
         headers: { Authorization: `Bearer ${token}` },
@@ -143,13 +161,12 @@ export function AddRecord() {
                   required
                 >
                   <option value="">Select Category</option>
-                  <option value="salary">Salary</option>
-                  <option value="freelance">Freelance</option>
-                  <option value="investment">Investment</option>
-                  <option value="grocery">Grocery</option>
-                  <option value="bills">Bills</option>
-                  <option value="entertainment">Entertainment</option>
-                  {/* Add more options as needed */}
+                  {transactionType === 'income' && incomeCategories.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
+                  {transactionType === 'expense' && expenseCategories.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
                 </select>
               </div>
               <div>

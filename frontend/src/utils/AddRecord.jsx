@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import ModalBasic from "../components/ModalBasic";
-
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { fetchUserProfile } from "./UserProfile";
 
 export function AddRecord() {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -13,32 +14,65 @@ export function AddRecord() {
   const [category, setCategory] = useState('');
   const [incomeSource, setIncomeSource] = useState('');
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL;
+  const [userId, setUserId] = useState('');
+
+
+  // fetch user profile
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const profile = await fetchUserProfile();
+        setUserId(profile.user.id || '');
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    getUserProfile();
+  }, []);
+
+  console.log(userId)
+
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const token = localStorage.getItem('access_token');
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const data = {
       amount,
       description,
-      category,
+      date: new Date().toISOString().split('T')[0],
+      user: userId
     };
 
     if (transactionType === 'income') {
+      data.category = { name: category }; // Match serializer structure
       data.source = incomeSource;
-      await axios.post(`${backendUrl}/transactions/income/`, data)
+
+      await axios.post(`${backendUrl}/transactions/income/`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
         .then(response => {
           toast.success('Income recorded successfully');
         })
         .catch(error => {
           toast.error('There was an error recording the income!');
+          console.log(error);
         });
     } else {
-      await axios.post(`${backendUrl}/transactions/expense/`, data)
+      data.category = { name: category }; // Match serializer structure
+
+      await axios.post(`${backendUrl}/transactions/expense/`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
         .then(response => {
           toast.success('Expense recorded successfully');
         })
         .catch(error => {
           toast.error('There was an error recording the expense!');
+          console.log(error);
         });
     }
 
@@ -48,6 +82,9 @@ export function AddRecord() {
     setCategory('');
     setIncomeSource('');
     setFeedbackModalOpen(false);
+
+    // Refresh the page
+    // window.location.reload();
   };
 
   return (

@@ -5,7 +5,6 @@ function TransactionsTable({ selectedItems, transactions, currency, handleSelect
   const { incomes, expenses } = transactions;
 
   const allTransactions = [...incomes, ...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-  console.log(allTransactions)
 
   return (
     <div className="bg-white shadow-md rounded my-6">
@@ -27,7 +26,7 @@ function TransactionsTable({ selectedItems, transactions, currency, handleSelect
               name={transaction.category.name ? transaction.category.name : 'No Name'}
               date={transaction.date}
               status={transaction.transaction_type ? transaction.transaction_type : 'No Category'}
-              amount={`${currency}${transaction.amount}`}
+              amount={`${transaction.transaction_type === 'income' ? '+' : '-'}${currency}${transaction.amount}`}
               handleClick={() => handleSelectedItems(transaction.id)}
               isChecked={selectedItems.includes(transaction.id)}
             />

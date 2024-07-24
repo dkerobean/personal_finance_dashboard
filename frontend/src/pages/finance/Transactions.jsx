@@ -10,9 +10,11 @@ import SearchForm from '../../partials/actions/SearchForm';
 import DropdownTransaction from '../../components/DropdownTransaction';
 import TransactionsTable from '../../partials/finance/TransactionsTable';
 import PaginationClassic from '../../components/PaginationClassic';
+
 import { useAuthCheck } from '../../utils/Auth';
 import { fetchUserProfile } from '../../utils/UserProfile';
 import axios from 'axios';
+import { AddRecord } from '../../utils/AddRecord';
 
 function Transactions() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -88,7 +90,11 @@ function Transactions() {
                 <div className="hidden sm:block">
                   <SearchForm />
                 </div>
-                <button className="btn bg-indigo-500 hover:bg-indigo-600 text-white">Export Transactions</button>
+                <div className="hidden sm:block ">
+                  <AddRecord />
+                </div>
+
+                {/* <button className="btn bg-indigo-500 hover:bg-indigo-600 text-white">Export Transactions</button> */}
               </div>
             </div>
             <div className="mb-5">

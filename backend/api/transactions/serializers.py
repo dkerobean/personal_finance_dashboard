@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from user.models import Income, Expense, IncomeCategory, ExpenseCategory
+from user.models import Income, Expense, IncomeCategory, ExpenseCategory, Budget
 
 
 class IncomeCategorySerializer(serializers.ModelSerializer):
@@ -40,3 +40,9 @@ class ExpenseSerializer(serializers.ModelSerializer):
         category, created = ExpenseCategory.objects.get_or_create(**category_data)
         expense = Expense.objects.create(category=category, **validated_data)
         return expense
+
+
+class BudgetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Budget
+        fields = '__all__'

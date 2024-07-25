@@ -115,7 +115,7 @@ class Budget(models.Model):
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='budgets')
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     spent_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    start_date = models.DateField(default=timezone.now)
+    start_date = models.DateField(default=timezone.now().date())
     end_date = models.DateField(null=True, blank=True)
     duration = models.CharField(max_length=10, choices=DURATION_CHOICES, default='monthly')
     is_active = models.BooleanField(default=True)

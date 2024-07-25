@@ -5,4 +5,5 @@ from user.models import Budget
 class BudgetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Budget
-        fields = '__all__'
+        fields = ['user', 'name', 'category', 'target_amount', 'duration']
+        read_only_fields = ['spent_amount', 'is_active', 'start_date', 'end_date', 'is_active',]

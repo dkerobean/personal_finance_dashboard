@@ -3,6 +3,8 @@ from django.contrib.auth.models import (AbstractBaseUser,
                                         PermissionsMixin,
                                         BaseUserManager)
 import uuid
+from datetime import timedelta
+from django.utils import timezone
 
 
 class CustomUserManager(BaseUserManager):
@@ -102,16 +104,53 @@ class Expense(models.Model):
 
 
 class Budget(models.Model):
+    DURATION_CHOICES = [
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+        ('yearly', 'Yearly'),
+    ]
+
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='budgets')
+    name = models.CharField(max_length=255, null=True, blank=True)
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='budgets')
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     spent_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(null=True, blank=True)
+    duration = models.CharField(max_length=10, choices=DURATION_CHOICES, default='monthly')
+    is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if not self.end_date:
+            if self.duration == 'weekly':
+                self.end_date = self.start_date + timedelta(weeks=1) - timedelta(days=1)
+            elif self.duration == 'monthly':
+                self.end_date = (self.start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+            elif self.duration == 'yearly':
+                self.end_date = self.start_date.replace(year=self.start_date.year + 1) - timedelta(days=1)
+        self.is_active = self.end_date >= timezone.now().date()
+        super().save(*args, **kwargs)
+        self.update_spent_amount()
+
+    def update_spent_amount(self):
+        total_spent = Expense.objects.filter(
+            user=self.user,
+            category=self.category,
+            date__range=[self.start_date, self.end_date]
+        ).aggregate(total=models.Sum('amount'))['total'] or 0
+        self.spent_amount = total_spent
+        super().save()
 
     @property
     def remaining_amount(self):
         return self.target_amount - self.spent_amount
+
+    @property
+    def spent_percentage(self):
+        return (self.spent_amount / self.target_amount) * 100
+
+    def __str__(self):
+        return self.name or 'Unamed Budget'
 
 
 class NetWorth(models.Model):

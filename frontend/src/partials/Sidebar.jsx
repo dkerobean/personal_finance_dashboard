@@ -118,6 +118,142 @@ function Sidebar({
               <span className="lg:hidden lg:sidebar-expanded:block 2xl:block">Pages</span>
             </h3>
             <ul className="mt-3">
+
+              {/* Main DashBoard */}
+              <li className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${pathname.includes('dashboard') && 'bg-slate-900'}`}>
+                <NavLink
+                  end
+                  to="/"
+                  className={`block text-slate-200 hover:text-white truncate transition duration-150 ${
+                    pathname.includes('dashboard') && 'hover:text-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg className="shrink-0 h-6 w-6" viewBox="0 0 24 24">
+                        <path
+                          className={`fill-current text-slate-400 ${
+                            (pathname === '/' || pathname.includes('dashboard')) && '!text-indigo-500'
+                          }`}
+                          d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0z"
+                        />
+                        <path
+                          className={`fill-current text-slate-600 ${(pathname === '/' || pathname.includes('dashboard')) && 'text-indigo-600'}`}
+                          d="M12 3c-4.963 0-9 4.037-9 9s4.037 9 9 9 9-4.037 9-9-4.037-9-9-9z"
+                        />
+                        <path
+                          className={`fill-current text-slate-400 ${(pathname === '/' || pathname.includes('dashboard')) && 'text-indigo-200'}`}
+                          d="M12 15c-1.654 0-3-1.346-3-3 0-.462.113-.894.3-1.285L6 6l4.714 3.301A2.973 2.973 0 0112 9c1.654 0 3 1.346 3 3s-1.346 3-3 3z"
+                        />
+                      </svg>
+                    <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                      Dashboard
+                    </span>
+                  </div>
+                </NavLink>
+              </li>
+
+              {/* Transactions */}
+              <li className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${pathname.includes('dashboard') && 'bg-slate-900'}`}>
+                <NavLink
+                  end
+                  to="/finance/transactions"
+                  className={`block text-slate-200 hover:text-white truncate transition duration-150 ${
+                    pathname.includes('dashboard') && 'hover:text-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg className="shrink-0 h-6 w-6" viewBox="0 0 24 24">
+                      <path
+                        className={`fill-current text-slate-400 ${pathname.includes('finance') && 'text-indigo-300'}`}
+                        d="M13 6.068a6.035 6.035 0 0 1 4.932 4.933H24c-.486-5.846-5.154-10.515-11-11v6.067Z"
+                      />
+                      <path
+                        className={`fill-current text-slate-700 ${pathname.includes('finance') && '!text-indigo-500'}`}
+                        d="M18.007 13c-.474 2.833-2.919 5-5.864 5a5.888 5.888 0 0 1-3.694-1.304L4 20.731C6.131 22.752 8.992 24 12.143 24c6.232 0 11.35-4.851 11.857-11h-5.993Z"
+                      />
+                      <path
+                        className={`fill-current text-slate-600 ${pathname.includes('finance') && 'text-indigo-600'}`}
+                        d="M6.939 15.007A5.861 5.861 0 0 1 6 11.829c0-2.937 2.167-5.376 5-5.85V0C4.85.507 0 5.614 0 11.83c0 2.695.922 5.174 2.456 7.17l4.483-3.993Z"
+                      />
+                    </svg>
+                    <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                      Transactions
+                    </span>
+                  </div>
+                </NavLink>
+              </li>
+
+              {/* Budgets */}
+              <li className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${pathname.includes('dashboard') && 'bg-slate-900'}`}>
+                <NavLink
+                  end
+                  to="/finance/cards"
+                  className={`block text-slate-200 hover:text-white truncate transition duration-150 ${
+                    pathname.includes('dashboard') && 'hover:text-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg className="shrink-0 h-6 w-6" viewBox="0 0 24 24">
+                              <circle
+                                className={`fill-current text-slate-400 ${pathname.includes('utility') && 'text-indigo-300'}`}
+                                cx="18.5"
+                                cy="5.5"
+                                r="4.5"
+                              />
+                              <circle
+                                className={`fill-current text-slate-600 ${pathname.includes('utility') && 'text-indigo-500'}`}
+                                cx="5.5"
+                                cy="5.5"
+                                r="4.5"
+                              />
+                              <circle
+                                className={`fill-current text-slate-600 ${pathname.includes('utility') && 'text-indigo-500'}`}
+                                cx="18.5"
+                                cy="18.5"
+                                r="4.5"
+                              />
+                              <circle
+                                className={`fill-current text-slate-400 ${pathname.includes('utility') && 'text-indigo-300'}`}
+                                cx="5.5"
+                                cy="18.5"
+                                r="4.5"
+                              />
+                            </svg>
+                    <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                      Budgets
+                    </span>
+                  </div>
+                </NavLink>
+              </li>
+
+              {/* Transactions */}
+              <li className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${pathname.includes('dashboard') && 'bg-slate-900'}`}>
+                <NavLink
+                  end
+                  to="/"
+                  className={`block text-slate-200 hover:text-white truncate transition duration-150 ${
+                    pathname.includes('dashboard') && 'hover:text-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg className="shrink-0 h-6 w-6" viewBox="0 0 24 24">
+                      <path
+                        className={`fill-current text-slate-600 ${pathname.includes('campaigns') && 'text-indigo-500'}`}
+                        d="M20 7a.75.75 0 01-.75-.75 1.5 1.5 0 00-1.5-1.5.75.75 0 110-1.5 1.5 1.5 0 001.5-1.5.75.75 0 111.5 0 1.5 1.5 0 001.5 1.5.75.75 0 110 1.5 1.5 1.5 0 00-1.5 1.5A.75.75 0 0120 7zM4 23a.75.75 0 01-.75-.75 1.5 1.5 0 00-1.5-1.5.75.75 0 110-1.5 1.5 1.5 0 001.5-1.5.75.75 0 111.5 0 1.5 1.5 0 001.5 1.5.75.75 0 110 1.5 1.5 1.5 0 00-1.5 1.5A.75.75 0 014 23z"
+                      />
+                      <path
+                        className={`fill-current text-slate-400 ${pathname.includes('campaigns') && 'text-indigo-300'}`}
+                        d="M17 23a1 1 0 01-1-1 4 4 0 00-4-4 1 1 0 010-2 4 4 0 004-4 1 1 0 012 0 4 4 0 004 4 1 1 0 010 2 4 4 0 00-4 4 1 1 0 01-1 1zM7 13a1 1 0 01-1-1 4 4 0 00-4-4 1 1 0 110-2 4 4 0 004-4 1 1 0 112 0 4 4 0 004 4 1 1 0 010 2 4 4 0 00-4 4 1 1 0 01-1 1z"
+                      />
+                    </svg>
+                    <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                      My Finance AI
+                    </span>
+                  </div>
+                </NavLink>
+              </li>
+
+
               {/* Dashboard */}
               <SidebarLinkGroup activecondition={pathname === '/' || pathname.includes('dashboard')}>
                 {(handleClick, open) => {

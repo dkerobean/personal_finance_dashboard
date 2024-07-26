@@ -45,7 +45,7 @@ function Signin() {
       toast.success('Login successful!');
       setTimeout(() => {
         navigate('/');
-      }, 1000);
+      }, 100);
     } catch (error) {
       toast.error('Authentication failed. Please check your credentials and try again.');
     } finally {

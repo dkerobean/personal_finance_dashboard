@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import TransactionsTableItem from './TransactionsTableItem';
+import EditRecord from '../../utils/EditRecord';
 
 function TransactionsTable({ transactions, currency }) {
   const [selectedItems, setSelectedItems] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const token = localStorage.getItem('access_token');
 
   const handleSelectedItems = (id) => {
     setSelectedItems((prevSelectedItems) => {
@@ -19,14 +27,39 @@ function TransactionsTable({ transactions, currency }) {
     });
   };
 
-  const handleDelete = () => {
-    // Implement delete logic
-    console.log('Deleting items:', selectedItems);
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete the selected transactions?')) {
+      return;
+    }
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    try {
+      for (const id of selectedItems) {
+        const transaction = allTransactions.find((t) => t.id === id);
+        const url = transaction.transaction_type === 'income'
+          ? `${backendUrl}/transactions/income/${id}/`
+          : `${backendUrl}/transactions/expense/${id}/`;
+
+        await axios.delete(url, { headers });
+      }
+
+      toast.success('Transactions deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete transactions');
+    }
+
+    setSelectedItems([]);
+    setShowOptions(false);
+    setShowUpdate(false);
   };
 
   const handleUpdate = () => {
-    // Implement update logic for the first selected item
-    console.log('Updating item:', selectedItems[0]);
+    const transactionToEdit = allTransactions.find(t => t.id === selectedItems[0]);
+    setEditingTransaction(transactionToEdit);
+    setEditModalOpen(true);
   };
 
   const { incomes, expenses } = transactions;
@@ -113,6 +146,13 @@ function TransactionsTable({ transactions, currency }) {
           ))}
         </tbody>
       </table>
+      {editingTransaction && (
+        <EditRecord
+          transaction={editingTransaction}
+          modalOpen={editModalOpen}
+          setModalOpen={setEditModalOpen}
+        />
+      )}
     </div>
   );
 }

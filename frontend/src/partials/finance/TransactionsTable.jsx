@@ -1,30 +1,71 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TransactionsTableItem from './TransactionsTableItem';
 
-function TransactionsTable({ selectedItems, transactions, currency, handleSelectedItems }) {
+function TransactionsTable({ transactions, currency }) {
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showUpdate, setShowUpdate] = useState(false);
+
+  const handleSelectedItems = (id) => {
+    setSelectedItems((prevSelectedItems) => {
+      const newSelectedItems = prevSelectedItems.includes(id)
+        ? prevSelectedItems.filter((item) => item !== id)
+        : [...prevSelectedItems, id];
+
+      setShowOptions(newSelectedItems.length > 0);
+      setShowUpdate(newSelectedItems.length === 1);
+
+      return newSelectedItems;
+    });
+  };
+
+  const handleDelete = () => {
+    // Implement delete logic
+    console.log('Deleting items:', selectedItems);
+  };
+
+  const handleUpdate = () => {
+    // Implement update logic for the first selected item
+    console.log('Updating item:', selectedItems[0]);
+  };
+
   const { incomes, expenses } = transactions;
+  const allTransactions = [...incomes, ...expenses].sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
 
-  const allTransactions = [...incomes, ...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const groupedTransactions = allTransactions.reduce((acc, transaction) => {
-    const date = new Date(transaction.date);
-    const formattedDate = new Intl.DateTimeFormat('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(date);
-
-    if (!acc[formattedDate]) {
-      acc[formattedDate] = [];
+  // Group transactions by date
+  const groupedTransactions = allTransactions.reduce((groups, transaction) => {
+    const date = new Date(transaction.date).toDateString();
+    if (!groups[date]) {
+      groups[date] = [];
     }
-
-    acc[formattedDate].push(transaction);
-    return acc;
+    groups[date].push(transaction);
+    return groups;
   }, {});
 
   return (
     <div className="bg-white shadow-md rounded my-6">
+      <div className="flex justify-end mb-4">
+        {showOptions && (
+          <>
+            {showUpdate && (
+              <button
+                className="btn bg-blue-500 hover:bg-blue-600 text-white mr-2"
+                onClick={handleUpdate}
+              >
+                Update
+              </button>
+            )}
+            <button
+              className="btn bg-red-500 hover:bg-red-600 text-white"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
+          </>
+        )}
+      </div>
       <table className="min-w-max w-full table-auto">
         <thead>
           <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
@@ -38,20 +79,36 @@ function TransactionsTable({ selectedItems, transactions, currency, handleSelect
           {Object.keys(groupedTransactions).map((date) => (
             <React.Fragment key={date}>
               <tr>
-                <td colSpan="4" className="bg-gray-100 text-gray-700 text-sm font-bold py-2 px-4">{date}</td>
+                <td
+                  colSpan="4"
+                  className="bg-gray-100 text-gray-800 text-sm font-semibold py-2 px-4"
+                >
+                  {date}
+                </td>
               </tr>
-              {groupedTransactions[date].map((transaction) => (
-                <TransactionsTableItem
-                  key={transaction.id}
-                  id={transaction.id}
-                  name={transaction.category.name ? transaction.category.name : 'No Name'}
-                  date={date}
-                  status={transaction.transaction_type ? transaction.transaction_type : 'No Category'}
-                  amount={`${transaction.transaction_type === 'income' ? '+' : '-'}${currency}${transaction.amount}`}
-                  handleClick={() => handleSelectedItems(transaction.id)}
-                  isChecked={selectedItems.includes(transaction.id)}
-                />
-              ))}
+              {groupedTransactions[date].map((transaction) => {
+                const formattedDate = new Intl.DateTimeFormat('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                }).format(new Date(transaction.date));
+
+                return (
+                  <TransactionsTableItem
+                    key={transaction.id}
+                    id={transaction.id}
+                    name={transaction.category.name || 'No Name'}
+                    date={formattedDate}
+                    status={transaction.transaction_type || 'No Category'}
+                    amount={`${
+                      transaction.transaction_type === 'income' ? '+' : '-'
+                    }${currency}${transaction.amount}`}
+                    handleClick={handleSelectedItems}
+                    isChecked={selectedItems.includes(transaction.id)}
+                  />
+                );
+              })}
             </React.Fragment>
           ))}
         </tbody>

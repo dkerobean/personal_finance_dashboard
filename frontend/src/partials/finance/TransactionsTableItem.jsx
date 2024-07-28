@@ -1,8 +1,7 @@
 import React from 'react';
 import transactionImage from '../../images/transactions-image-02.svg';
 
-function TransactionsTableItem(props) {
-
+function TransactionsTableItem({ id, name, date, status, amount, handleClick, isChecked }) {
   const statusColor = (status) => {
     switch (status) {
       case 'income':
@@ -32,29 +31,29 @@ function TransactionsTableItem(props) {
           <label className="inline-flex items-center">
             <span className="sr-only">Select</span>
             <input
-              id={props.id}
+              id={id}
               className="form-checkbox mr-3"
               type="checkbox"
-              onChange={props.handleClick}
-              checked={props.isChecked}
+              onChange={() => handleClick(id)}
+              checked={isChecked}
             />
             <div className="w-9 h-9 shrink-0 mr-2 sm:mr-3">
-              <img className="rounded-full" src={transactionImage} width="36" height="36" alt={props.name} />
+              <img className="rounded-full" src={transactionImage} width="36" height="36" alt={name} />
             </div>
-            <div className="font-medium text-slate-800">{props.name}</div>
+            <div className="font-medium text-slate-800">{name}</div>
           </label>
         </div>
       </td>
       <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-        <div className="text-left">{props.date}</div>
+        <div className="text-left">{date}</div>
       </td>
       <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
         <div className="text-left">
-          <div className={`text-xs inline-flex font-medium rounded-full text-center px-2.5 py-1 ${statusColor(props.status)}`}>{props.status}</div>
+          <div className={`text-xs inline-flex font-medium rounded-full text-center px-2.5 py-1 ${statusColor(status)}`}>{status}</div>
         </div>
       </td>
       <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-px">
-        <div className={`text-right font-medium ${amountColor(props.amount)}`}>{props.amount}</div>
+        <div className={`text-right font-medium ${amountColor(amount)}`}>{amount}</div>
       </td>
     </tr>
   );

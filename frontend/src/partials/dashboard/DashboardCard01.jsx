@@ -7,7 +7,7 @@ import EditMenu from '../../components/DropdownEditMenu';
 // Import utilities
 import { tailwindConfig, hexToRGB } from '../../utils/Utils';
 
-function DashboardCard01() {
+function DashboardCard01( {net_worth, currency} ) {
 
   const chartData = {
     labels: [
@@ -66,7 +66,7 @@ function DashboardCard01() {
           {/* Icon */}
           <img src={Icon} width="32" height="32" alt="Icon 01" />
           {/* Menu button */}
-          <EditMenu align="right" className="relative inline-flex">
+          {/* <EditMenu align="right" className="relative inline-flex">
             <li>
               <Link className="font-medium text-sm text-slate-600 hover:text-slate-800 flex py-1 px-3" to="#0">Option 1</Link>
             </li>
@@ -76,12 +76,12 @@ function DashboardCard01() {
             <li>
               <Link className="font-medium text-sm text-rose-500 hover:text-rose-600 flex py-1 px-3" to="#0">Remove</Link>
             </li>
-          </EditMenu>
+          </EditMenu> */}
         </header>
-        <h2 className="text-lg font-semibold text-slate-800 mb-2">Acme Plus</h2>
+        <h2 className="text-lg font-semibold text-slate-800 mb-2">Balance</h2>
         <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Sales</div>
         <div className="flex items-start">
-          <div className="text-3xl font-bold text-slate-800 mr-2">$24,780</div>
+          <div className="text-3xl font-bold text-slate-800 mr-2">{currency}{net_worth}</div>
           <div className="text-sm font-semibold text-white px-1.5 bg-emerald-500 rounded-full">+49%</div>
         </div>
       </div>

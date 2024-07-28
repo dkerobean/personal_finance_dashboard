@@ -49,6 +49,13 @@ function Dashboard() {
       return null;
     }
 
+    const profile = userProfile || {};
+
+    const currency = profile.currency_symbol || '';
+    const cash_flow = profile.cash_flow || 0;
+    const net_worth = profile.net_worth || 0;
+    const total_spending = profile.total_spending || 0;
+
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -84,11 +91,11 @@ function Dashboard() {
               <FintechIntro profile={userProfile}/>
 
               {/* Line chart (Acme Plus) */}
-              <DashboardCard01 />
+              <DashboardCard01  net_worth={net_worth} currency={currency} />
               {/* Line chart (Acme Advanced) */}
-              <DashboardCard02 />
+              <DashboardCard02 cash_flow={cash_flow} currency={currency}/>
               {/* Line chart (Acme Professional) */}
-              <DashboardCard03 />
+              <DashboardCard03 total_spending={total_spending} currency={currency}/>
               {/* Bar chart (Direct vs Indirect) */}
               <DashboardCard04 />
               {/* Line chart (Real Time Value) */}

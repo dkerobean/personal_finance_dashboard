@@ -6,6 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import IsAuthenticated
 from user.models import Income, Expense, IncomeCategory, ExpenseCategory
+from django.shortcuts import get_object_or_404
 
 
 class IncomeCategoryView(APIView):
@@ -37,6 +38,19 @@ class IncomeView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request, pk):
+        income = get_object_or_404(Income, id=pk, user=request.user)
+        serializer = IncomeSerializer(income, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        income = get_object_or_404(Income, id=pk, user=request.user)
+        income.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ExpenseView(APIView):
     permission_classes = [IsAuthenticated]
@@ -52,6 +66,19 @@ class ExpenseView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        expense = get_object_or_404(Expense, id=pk, user=request.user)
+        serializer = ExpenseSerializer(expense, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        expense = get_object_or_404(Expense, id=pk, user=request.user)
+        expense.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TransactionsView(APIView):

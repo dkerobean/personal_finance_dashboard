@@ -1,5 +1,6 @@
 from django.contrib import admin
-from user.models import ExpenseCategory, IncomeCategory ,Income, Expense, Budget
+from user.models import (ExpenseCategory, IncomeCategory,
+                         Income, Expense, Budget)
 
 # Register your models here.
 admin.site.register(ExpenseCategory)

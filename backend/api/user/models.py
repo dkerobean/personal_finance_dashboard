@@ -5,6 +5,8 @@ from django.contrib.auth.models import (AbstractBaseUser,
 import uuid
 from datetime import timedelta
 from django.utils import timezone
+from django.db.models import Sum
+
 
 
 class CustomUserManager(BaseUserManager):
@@ -57,9 +59,24 @@ class Profile(models.Model):
     currency_symbol = models.CharField(max_length=5, default='₵', null=True,
                                        blank=True)
     net_worth = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    cash_flow = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_spending = models.DecimalField(max_digits=15, decimal_places=2, default=0)
 
     def __str__(self):
         return self.user.username
+
+    def calculate_cash_flow(self):
+        total_income = self.user.incomes.aggregate(total=models.Sum('amount'))['total'] or 0
+        total_expenses = self.user.expenses.aggregate(total=models.Sum('amount'))['total'] or 0
+        return total_income - total_expenses
+
+    def calculate_total_spending(self):
+        return self.user.expenses.aggregate(total=models.Sum('amount'))['total'] or 0
+
+    def update_financials(self):
+        self.cash_flow = self.calculate_cash_flow()
+        self.total_spending = self.calculate_total_spending()
+        self.save()
 
 
 class IncomeCategory(models.Model):
@@ -112,7 +129,7 @@ class Budget(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='budgets')
     name = models.CharField(max_length=255, null=True, blank=True)
-    category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='budgets')
+    # category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='budgets')
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     spent_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     start_date = models.DateField(default=timezone.now().date())
@@ -135,7 +152,7 @@ class Budget(models.Model):
     def update_spent_amount(self):
         total_spent = Expense.objects.filter(
             user=self.user,
-            category=self.category,
+            # category=self.category,
             date__range=[self.start_date, self.end_date]
         ).aggregate(total=models.Sum('amount'))['total'] or 0
         self.spent_amount = total_spent

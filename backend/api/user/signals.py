@@ -1,8 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db.models import Sum
-from django.utils import timezone
-from .models import (CustomUser, Profile, Expense, Income, NetWorth, Budget)
+from .models import CustomUser, Profile, Expense, Income, NetWorth, Budget
 
 
 @receiver(post_save, sender=CustomUser)
@@ -19,8 +18,20 @@ def delete_user(sender, instance, **kwargs):
         instance.profile.delete()
 
 
+# update financials(cashflow, total expenses)
 @receiver(post_save, sender=Income)
 @receiver(post_save, sender=Expense)
+@receiver(post_delete, sender=Income)
+@receiver(post_delete, sender=Expense)
+def update_profile_financials(sender, instance, **kwargs):
+    profile = instance.user.profile
+    profile.update_financials()
+
+
+@receiver(post_save, sender=Income)
+@receiver(post_delete, sender=Income)
+@receiver(post_save, sender=Expense)
+@receiver(post_delete, sender=Expense)
 def update_profile_net_worth(sender, instance, **kwargs):
     user = instance.user
 
@@ -36,12 +47,12 @@ def update_profile_net_worth(sender, instance, **kwargs):
 @receiver(post_save, sender=Expense)
 @receiver(post_delete, sender=Expense)
 def update_budget_on_expense_change(sender, instance, **kwargs):
-    budgets = Budget.objects.filter(user=instance.user, category=instance.category)
+    budgets = Budget.objects.filter(user=instance.user)
     for budget in budgets:
         if budget.start_date <= instance.date <= budget.end_date:
             total_spent = Expense.objects.filter(
                 user=instance.user,
-                category=instance.category,
+                # category=instance.category,
                 date__range=[budget.start_date, budget.end_date]
             ).aggregate(total=Sum('amount'))['total'] or 0
             budget.spent_amount = total_spent

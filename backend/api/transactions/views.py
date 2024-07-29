@@ -52,6 +52,15 @@ class IncomeView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class IncomeDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        income = get_object_or_404(Income, id=pk, user=request.user)
+        serializer = IncomeSerializer(income)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ExpenseView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -81,13 +90,22 @@ class ExpenseView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ExpenseDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        expense = get_object_or_404(Income, id=pk, user=request.user)
+        serializer = ExpenseSerializer(expense)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class TransactionsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
-        income_query = Income.objects.filter(user=user)
-        expense_query = Expense.objects.filter(user=user)
+        income_query = Income.objects.filter(user=user).order_by('-date')
+        expense_query = Expense.objects.filter(user=user).order_by('-date')
 
         # Filtering
         filter_type = request.query_params.get('type')

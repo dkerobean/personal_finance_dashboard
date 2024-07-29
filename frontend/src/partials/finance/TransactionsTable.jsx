@@ -56,10 +56,22 @@ function TransactionsTable({ transactions, currency }) {
     setShowUpdate(false);
   };
 
-  const handleUpdate = () => {
-    const transactionToEdit = allTransactions.find(t => t.id === selectedItems[0]);
-    setEditingTransaction(transactionToEdit);
-    setEditModalOpen(true);
+  const handleUpdate = async () => {
+    const transactionId = selectedItems[0];
+    const transactionType = allTransactions.find(t => t.id === transactionId).transaction_type;
+    const url = transactionType === 'income'
+      ? `${backendUrl}/transactions/income/detail/${transactionId}/`
+      : `${backendUrl}/transactions/expense/detail/${transactionId}/`;
+
+    try {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEditingTransaction(response.data);
+      setEditModalOpen(true);
+    } catch (error) {
+      toast.error('Failed to fetch transaction details');
+    }
   };
 
   const { incomes, expenses } = transactions;

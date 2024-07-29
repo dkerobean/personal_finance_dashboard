@@ -12,7 +12,6 @@ function EditRecord({ transaction, modalOpen, setModalOpen }) {
   const [incomeSource, setIncomeSource] = useState(transaction.source || '');
   const [incomeCategories, setIncomeCategories] = useState([]);
   const [expenseCategories, setExpenseCategories] = useState([]);
-  const [userId, setUserId] = useState(transaction.user);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const token = localStorage.getItem('access_token');
@@ -44,8 +43,9 @@ function EditRecord({ transaction, modalOpen, setModalOpen }) {
       amount,
       description,
       date: transaction.date,
-      user: userId,
+      user: transaction.user,
       category: { name: category },
+      source: transactionType === 'income' ? incomeSource : undefined,
     };
 
     try {
@@ -131,7 +131,7 @@ function EditRecord({ transaction, modalOpen, setModalOpen }) {
               <label className="block text-sm font-medium mb-1" htmlFor="description">
                 Description <span className="text-rose-500">*</span>
               </label>
-            <textarea
+              <textarea
                 id="description"
                 className="form-textarea w-full px-2 py-1"
                 rows="4"

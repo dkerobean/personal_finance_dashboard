@@ -1,9 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import IncomeSerializer, ExpenseSerializer, IncomeCategorySerializer, ExpenseCategorySerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
+from .serializers import (IncomeSerializer, ExpenseSerializer,
+                          IncomeCategorySerializer, ExpenseCategorySerializer)
 from rest_framework.permissions import IsAuthenticated
 from user.models import Income, Expense, IncomeCategory, ExpenseCategory
 from django.shortcuts import get_object_or_404
@@ -94,7 +93,7 @@ class ExpenseDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        expense = get_object_or_404(Income, id=pk, user=request.user)
+        expense = get_object_or_404(Expense, id=pk, user=request.user)
         serializer = ExpenseSerializer(expense)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

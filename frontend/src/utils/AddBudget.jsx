@@ -32,21 +32,6 @@ export function AddBudget() {
     getUserProfile();
   }, []);
 
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(`${backendUrl}/transactions/category/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setCategories(response.data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-  }, [backendUrl, token]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();

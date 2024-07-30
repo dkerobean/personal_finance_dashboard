@@ -5,7 +5,7 @@ import PieChart from '../../charts/PieChart';
 import { tailwindConfig } from '../../utils/Utils';
 
 function FintechCard09() {
-  
+
   const chartData = {
     labels: ['Cash', 'Commodities', 'Bonds', 'Stock'],
     datasets: [
@@ -32,10 +32,9 @@ function FintechCard09() {
   return (
     <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white shadow-lg rounded-sm border border-slate-200">
       <header className="px-5 py-4 border-b border-slate-100 flex items-center">
-        <h2 className="font-semibold text-slate-800">Portfolio Value</h2>
+        <h2 className="font-semibold text-slate-800">Expense Structure</h2>
       </header>
       <div className="px-5 py-3">
-        <div className="text-sm italic mb-2">Hey Mark, here is the value of your portfolio:</div>
         <div className="text-3xl font-bold text-slate-800">$224,807.27</div>
       </div>
       {/* Chart built with Chart.js 3 */}

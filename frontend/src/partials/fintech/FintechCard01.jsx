@@ -87,9 +87,9 @@ function FintechCard01() {
   };
 
   return (
-    <div className="flex flex-col col-span-full xl:col-span-8 bg-white shadow-lg rounded-sm border border-slate-200">
+    <div className="flex flex-col col-span-full xl:col-span-6 bg-white shadow-lg rounded-sm border border-slate-200">
       <header className="px-5 py-4 border-b border-slate-100 flex items-center">
-        <h2 className="font-semibold text-slate-800">Portfolio Returns</h2>
+        <h2 className="font-semibold text-slate-800">Balance Trend</h2>
       </header>
       {/* Chart built with Chart.js 3 */}
       {/* Change the height attribute to adjust the chart height */}

@@ -20,7 +20,10 @@ import DashboardCard08 from '../partials/dashboard/DashboardCard08';
 import DashboardCard09 from '../partials/dashboard/DashboardCard09';
 import DashboardCard10 from '../partials/dashboard/DashboardCard10';
 import DashboardCard11 from '../partials/dashboard/DashboardCard11';
+
 import FintechIntro from '../partials/fintech/FintechIntro';
+import FintechCard01 from '../partials/fintech/FintechCard01';
+import FintechCard09 from '../partials/fintech/FintechCard09';
 
 import { fetchUserProfile } from '../utils/UserProfile';
 import { useAuthCheck } from '../utils/Auth';
@@ -96,22 +99,23 @@ function Dashboard() {
               <DashboardCard02 cash_flow={cash_flow} currency={currency}/>
               {/* Line chart (Acme Professional) */}
               <DashboardCard03 total_spending={total_spending} currency={currency}/>
-              {/* Bar chart (Direct vs Indirect) */}
+              {/* Bar chart (Cashflow) */}
               <DashboardCard04 />
-              {/* Line chart (Real Time Value) */}
-              <DashboardCard05 />
-              {/* Doughnut chart (Top Countries) */}
-              <DashboardCard06 />
-              {/* Table (Top Channels) */}
-              <DashboardCard07 />
-              {/* Line chart (Sales Over Time) */}
-              <DashboardCard08 />
-              {/* Stacked bar chart (Sales VS Refunds) */}
-              <DashboardCard09 />
-              {/* Card (Recent Activity) */}
-              <DashboardCard10 />
-              {/* Card (Income/Expenses) */}
+              {/* Line chart (Balance Trend) */}
+              <FintechCard01 />
+              {/* Doughnut chart (Expense Structure) */}
+              <FintechCard09 />
+              {/* Card (Last Records) */}
               <DashboardCard11 />
+              {/* Table (Top Channels) */}
+              {/* <DashboardCard07 /> */}
+              {/* Line chart (Sales Over Time) */}
+              {/* <DashboardCard08 /> */}
+              {/* Stacked bar chart (Sales VS Refunds) */}
+              {/* <DashboardCard09 /> */}
+              {/* Card (Recent Activity) */}
+              {/* <DashboardCard10 /> */}
+
 
             </div>
 

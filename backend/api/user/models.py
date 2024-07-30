@@ -6,7 +6,7 @@ import uuid
 from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Sum
-
+from datetime import datetime
 
 
 class CustomUserManager(BaseUserManager):
@@ -78,30 +78,23 @@ class Profile(models.Model):
         self.total_spending = self.calculate_total_spending()
         self.save()
 
-    # get 6 months balance trend
-    def get_balance_trend(self):
-        today = timezone.now().date()
-        six_months_ago = today - timedelta(days=180)  # Approximate 6 months ago
+    def get_top_expenses(self):
+        current_month = datetime.now().month
+        current_year = datetime.now().year
 
-        labels = []
-        balance_data = []
+        # Filter expenses for the current month and year
+        top_expenses = self.user.expenses.filter(date__month=current_month, date__year=current_year) \
+            .values('category__name') \
+            .annotate(total=Sum('amount')) \
+            .order_by('-total')[:4]
 
-        for i in range(6):
-            start_date = today - timedelta(days=(i * 30))
-            end_date = start_date + timedelta(days=30)
+        # Calculate the total of the top expenses
+        total_sum = top_expenses.aggregate(total_sum=Sum('total'))['total_sum'] or 0
 
-            incomes = self.user.incomes.filter(date__range=[start_date, end_date]).aggregate(total=models.Sum('amount'))['total'] or 0
-            expenses = self.user.expenses.filter(date__range=[start_date, end_date]).aggregate(total=models.Sum('amount'))['total'] or 0
+        # Format the response
+        result = [{'category': expense['category__name'], 'total': expense['total']} for expense in top_expenses]
 
-            balance = incomes - expenses
-
-            labels.append(start_date.strftime('%b %Y'))
-            balance_data.append(balance)
-
-        return {
-            'labels': labels[::-1],  # Reverse the list to start from the previous month
-            'data': balance_data[::-1]  # Reverse the list to start from the previous month
-        }
+        return {'top_expenses': result, 'total': total_sum}
 
 
 class IncomeCategory(models.Model):

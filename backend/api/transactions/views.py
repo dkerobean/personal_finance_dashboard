@@ -199,3 +199,12 @@ class BalanceTrendView(APIView):
             })
 
         return Response(result, status=status.HTTP_200_OK)
+
+
+class TopExpensesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = request.user.profile
+        top_expenses = Profile.get_top_expenses(profile)
+        return Response(top_expenses, status=status.HTTP_200_OK)

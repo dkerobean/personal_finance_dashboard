@@ -17,5 +17,6 @@ urlpatterns = [
 
     path('cashflow/', views.CashflowView.as_view(), name='cashflow'),
     path('balance-trend/', views.BalanceTrendView.as_view(), name='balance-trend'),
+    path('top-expenses/', views.TopExpensesView.as_view(), name='top-expenses'),
 ]
 

@@ -4,7 +4,7 @@ from rest_framework import status
 from .serializers import (IncomeSerializer, ExpenseSerializer,
                           IncomeCategorySerializer, ExpenseCategorySerializer)
 from rest_framework.permissions import IsAuthenticated
-from user.models import Income, Expense, IncomeCategory, ExpenseCategory
+from user.models import Income, Expense, IncomeCategory, ExpenseCategory, Profile, NetWorth
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from django.utils import timezone
@@ -169,3 +169,33 @@ class CashflowView(APIView):
                 data['income'][index] = inc['total']
 
         return Response(data)
+
+
+class BalanceTrendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get the user
+        user = request.user
+
+        # Calculate start and end dates for the current month
+        today = timezone.now().date()
+        start_date = today.replace(day=1)
+        end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+
+        # Generate a list of dates for the current month
+        date_list = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+        # Fetch net worths for the current month
+        net_worths = NetWorth.objects.filter(user=user, date__range=[start_date, end_date]).order_by('date')
+        records_dict = {record.date: record.net_worth for record in net_worths}
+
+        # Prepare data for the response
+        result = []
+        for date in date_list:
+            result.append({
+                "date": date.strftime('%Y-%m-%d'),
+                "balance": records_dict.get(date, 0)  # Use 0 if no record exists for that date
+            })
+
+        return Response(result, status=status.HTTP_200_OK)

@@ -16,5 +16,6 @@ urlpatterns = [
     path('all/', views.TransactionsView.as_view(), name='transactions'),
 
     path('cashflow/', views.CashflowView.as_view(), name='cashflow'),
+    path('balance-trend/', views.BalanceTrendView.as_view(), name='balance-trend'),
 ]
 

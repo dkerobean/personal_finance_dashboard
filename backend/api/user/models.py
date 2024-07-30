@@ -78,6 +78,31 @@ class Profile(models.Model):
         self.total_spending = self.calculate_total_spending()
         self.save()
 
+    # get 6 months balance trend
+    def get_balance_trend(self):
+        today = timezone.now().date()
+        six_months_ago = today - timedelta(days=180)  # Approximate 6 months ago
+
+        labels = []
+        balance_data = []
+
+        for i in range(6):
+            start_date = today - timedelta(days=(i * 30))
+            end_date = start_date + timedelta(days=30)
+
+            incomes = self.user.incomes.filter(date__range=[start_date, end_date]).aggregate(total=models.Sum('amount'))['total'] or 0
+            expenses = self.user.expenses.filter(date__range=[start_date, end_date]).aggregate(total=models.Sum('amount'))['total'] or 0
+
+            balance = incomes - expenses
+
+            labels.append(start_date.strftime('%b %Y'))
+            balance_data.append(balance)
+
+        return {
+            'labels': labels[::-1],  # Reverse the list to start from the previous month
+            'data': balance_data[::-1]  # Reverse the list to start from the previous month
+        }
+
 
 class IncomeCategory(models.Model):
     name = models.CharField(max_length=100)

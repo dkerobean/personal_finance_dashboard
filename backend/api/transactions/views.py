@@ -6,6 +6,9 @@ from .serializers import (IncomeSerializer, ExpenseSerializer,
 from rest_framework.permissions import IsAuthenticated
 from user.models import Income, Expense, IncomeCategory, ExpenseCategory
 from django.shortcuts import get_object_or_404
+from datetime import timedelta
+from django.utils import timezone
+from django.db.models import Sum
 
 
 class IncomeCategoryView(APIView):
@@ -125,3 +128,44 @@ class TransactionsView(APIView):
             'incomes': income_serializer.data,
             'expenses': expense_serializer.data
         })
+
+
+# Get last 6 months of income and expenses
+class CashflowView(APIView):
+
+    def get(self, request):
+        user = request.user
+        today = timezone.now().date()
+        six_months_ago = today - timedelta(days=180)
+
+        # Get expenses and income for the last six months
+        expenses = Expense.objects.filter(user=user, date__gte=six_months_ago).values('date__month').annotate(total=Sum('amount')).order_by('date__month')
+        income = Income.objects.filter(user=user, date__gte=six_months_ago).values('date__month').annotate(total=Sum('amount')).order_by('date__month')
+
+        data = {
+            'labels': [],
+            'income': [],
+            'expenses': []
+        }
+
+        # Initialize data for the last six months to 0
+        for i in range(6):
+            month = (today - timedelta(days=i * 30)).month
+            data['labels'].append(month)
+            data['income'].append(0)
+            data['expenses'].append(0)
+
+        # Update data with actual expense and income values
+        for exp in expenses:
+            month = exp['date__month']
+            if month in data['labels']:
+                index = data['labels'].index(month)
+                data['expenses'][index] = exp['total']
+
+        for inc in income:
+            month = inc['date__month']
+            if month in data['labels']:
+                index = data['labels'].index(month)
+                data['income'][index] = inc['total']
+
+        return Response(data)

@@ -1,27 +1,18 @@
 import React, { useRef, useEffect } from 'react';
-
-import {
-  Chart, LineController, LineElement, Filler, PointElement, LinearScale, TimeScale, Tooltip,
-} from 'chart.js';
+import { Chart, LineController, LineElement, PointElement, LinearScale, TimeScale, Tooltip } from 'chart.js';
 import 'chartjs-adapter-moment';
 
 // Import utilities
 import { tailwindConfig } from '../utils/Utils';
 
-Chart.register(LineController, LineElement, Filler, PointElement, LinearScale, TimeScale, Tooltip);
+Chart.register(LineController, LineElement, PointElement, LinearScale, TimeScale, Tooltip);
 
-function LineChart05({
-  data,
-  width,
-  height
-}) {
-
+function LineChart05({ data, width, height }) {
   const canvas = useRef(null);
   const legend = useRef(null);
 
   useEffect(() => {
     const ctx = canvas.current;
-    // eslint-disable-next-line no-unused-vars
     const chart = new Chart(ctx, {
       type: 'line',
       data: data,
@@ -36,17 +27,15 @@ function LineChart05({
               drawBorder: false,
             },
             ticks: {
-              maxTicksLimit: 7,
-              callback: (value) => `${value}%`,
+              callback: (value) => `${value}`,
             },
           },
           x: {
             type: 'time',
             time: {
-              parser: 'MM-DD-YYYY',
-              unit: 'month',
+              unit: 'day',
               displayFormats: {
-                month: 'MMM YY',
+                day: 'MMM D',
               },
             },
             grid: {
@@ -54,7 +43,7 @@ function LineChart05({
               drawBorder: false,
             },
             ticks: {
-              autoSkipPadding: 48,
+              autoSkip: true,
               maxRotation: 0,
             },
           },
@@ -65,8 +54,8 @@ function LineChart05({
           },
           tooltip: {
             callbacks: {
-              title: () => false, // Disable tooltip title
-              label: (context) => `${context.parsed.y}%`,
+              title: () => false,
+              label: (context) => `${context.parsed.y}`,
             },
           },
         },
@@ -83,16 +72,13 @@ function LineChart05({
           afterUpdate(c, args, options) {
             const ul = legend.current;
             if (!ul) return;
-            // Remove old legend items
             while (ul.firstChild) {
               ul.firstChild.remove();
             }
-            // Reuse the built-in legendItems generator
             const items = c.options.plugins.legend.labels.generateLabels(c);
             items.forEach((item) => {
               const li = document.createElement('li');
               li.style.marginLeft = tailwindConfig().theme.margin[3];
-              // Button element
               const button = document.createElement('button');
               button.style.display = 'inline-flex';
               button.style.alignItems = 'center';
@@ -101,7 +87,6 @@ function LineChart05({
                 c.setDatasetVisibility(item.datasetIndex, !c.isDatasetVisible(item.datasetIndex));
                 c.update();
               };
-              // Color box
               const box = document.createElement('span');
               box.style.display = 'block';
               box.style.width = tailwindConfig().theme.width[3];
@@ -111,7 +96,6 @@ function LineChart05({
               box.style.borderWidth = '3px';
               box.style.borderColor = c.data.datasets[item.datasetIndex].borderColor;
               box.style.pointerEvents = 'none';
-              // Label
               const label = document.createElement('span');
               label.style.color = tailwindConfig().theme.colors.slate[500];
               label.style.fontSize = tailwindConfig().theme.fontSize.sm[0];
@@ -128,25 +112,20 @@ function LineChart05({
       ],
     });
     return () => chart.destroy();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data]);
 
   return (
     <React.Fragment>
       <div className="px-5 py-3">
         <div className="flex flex-wrap justify-between items-end">
           <div className="flex items-center">
-            <div className="text-3xl font-bold text-slate-800 mr-2">244.7%</div>
-            <div className="text-sm">
-              <span className="font-medium text-slate-800">17.4%</span> AVG
-            </div>
+            <div className="text-3xl font-bold text-slate-800 mr-2">Balance</div>
           </div>
           <div className="grow ml-2 mb-1">
             <ul ref={legend} className="flex flex-wrap justify-end" />
           </div>
         </div>
       </div>
-      {/* Chart built with Chart.js 3 */}
       <div className="grow">
         <canvas ref={canvas} width={width} height={height}></canvas>
       </div>

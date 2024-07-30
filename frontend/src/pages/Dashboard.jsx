@@ -104,7 +104,7 @@ function Dashboard() {
               {/* Line chart (Balance Trend) */}
               <FintechCard01 />
               {/* Doughnut chart (Expense Structure) */}
-              <FintechCard09 />
+              <FintechCard09 currency={currency}/>
               {/* Card (Last Records) */}
               <DashboardCard11 />
               {/* Table (Top Channels) */}

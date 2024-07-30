@@ -27,7 +27,12 @@ function LineChart05({ data, width, height }) {
               drawBorder: false,
             },
             ticks: {
-              callback: (value) => `${value}`,
+              callback: (value) => {
+                if (value >= 1000) {
+                  return `${(value / 1000).toFixed(0)}k`; // Convert 1000 to 1k, 2000 to 2k, etc.
+                }
+                return value;
+              },
             },
           },
           x: {

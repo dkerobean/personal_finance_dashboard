@@ -20,8 +20,9 @@ function PieChart({
   const legend = useRef(null);
 
   useEffect(() => {
+    console.log('PieChart Data:', data);  // Log the data to debug
+
     const ctx = canvas.current;
-    // eslint-disable-next-line no-unused-vars
     const chart = new Chart(ctx, {
       type: 'pie',
       data: data,
@@ -99,8 +100,7 @@ function PieChart({
       ],
     });
     return () => chart.destroy();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data]);
 
   return (
     <div className="grow flex flex-col justify-center">

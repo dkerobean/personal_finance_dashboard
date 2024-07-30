@@ -7,4 +7,3 @@ urlpatterns = [
     path('edit/<int:pk>/', views.BudgetView.as_view(), name="edit"),
     path('detail/<int:pk>/', views.BudgetDetailView.as_view(), name="budget-details"),
 ]
-

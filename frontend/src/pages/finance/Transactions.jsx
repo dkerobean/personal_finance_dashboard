@@ -91,7 +91,7 @@ function Transactions() {
                   <SearchForm />
                 </div>
                 <div className="hidden sm:block ">
-                  <AddRecord />
+                  <AddRecord fetchTransactions={fetchTransactions} />
                 </div>
 
                 {/* <button className="btn bg-indigo-500 hover:bg-indigo-600 text-white">Export Transactions</button> */}
@@ -129,7 +129,7 @@ function Transactions() {
                 </li>
               </ul>
             </div>
-            <TransactionsTable selectedItems={selectedItems} handleSelectedItems={handleSelectedItems} transactions={transactions} currency={currency} />
+            <TransactionsTable selectedItems={selectedItems} handleSelectedItems={handleSelectedItems} transactions={transactions} currency={currency} fetchTransactions={fetchTransactions} />
             <div className="mt-8">
               <PaginationClassic />
             </div>

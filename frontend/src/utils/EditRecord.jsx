@@ -4,7 +4,7 @@ import ModalBasic from '../components/ModalBasic';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function EditRecord({ transaction, modalOpen, setModalOpen }) {
+function EditRecord({ transaction, modalOpen, setModalOpen, fetchTransactions }) {
   const [transactionType, setTransactionType] = useState(transaction.transaction_type);
   const [amount, setAmount] = useState(transaction.amount);
   const [description, setDescription] = useState(transaction.description);
@@ -57,6 +57,7 @@ function EditRecord({ transaction, modalOpen, setModalOpen }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Transaction updated successfully');
+      fetchTransactions();
       setModalOpen(false);
     } catch (error) {
       toast.error('There was an error updating the transaction!');

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
-export function EditBudgetModal({ budget, isOpen, onClose }) {
+export function EditBudgetModal({ budget, isOpen, onClose, fetchBudgets }) {
   const [name, setName] = useState(budget.name || '');
-  const [spentAmount, setSpentAmount] = useState(budget.spent_amount || '');
   const [targetAmount, setTargetAmount] = useState(budget.target_amount || '');
   const [isActive, setIsActive] = useState(budget.is_active || false);
+  const [userId, setUserId] = useState('');
 
-  if (!isOpen) return null; // Hide modal if not open
+  if (!isOpen) return null;
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,14 +26,19 @@ export function EditBudgetModal({ budget, isOpen, onClose }) {
           name,
           target_amount: targetAmount,
           is_active: isActive,
+          user: userID
         }),
       });
 
       if (response.ok) {
         toast.success('Budget updated successfully!');
-        onClose(); // Close the modal after successful update
+        onClose();
+        fetchBudgets();
       } else {
-        const errorData = await response.json();
+        const errorText = await response.text();
+        console.error('Response text:', errorText);
+
+        const errorData = JSON.parse(errorText);
         toast.error(`Error: ${errorData.detail || 'Failed to update budget.'}`);
       }
     } catch (error) {

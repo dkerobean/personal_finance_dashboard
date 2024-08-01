@@ -3,10 +3,9 @@ import axios from 'axios';
 import ModalBasic from "../components/ModalBasic";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { fetchUserProfile } from "./UserProfile";
 
-export function AddBudget() {
+export function AddBudget({ fetchBudgets }) {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -18,7 +17,6 @@ export function AddBudget() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const token = localStorage.getItem('access_token');
 
-  // Fetch user profile
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -31,7 +29,6 @@ export function AddBudget() {
 
     getUserProfile();
   }, []);
-
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -47,13 +44,13 @@ export function AddBudget() {
     })
       .then(response => {
         toast.success('Budget added successfully');
+        fetchBudgets();
       })
       .catch(error => {
         toast.error('There was an error adding the budget!');
         console.log(error);
       });
 
-    // Clear form fields after submission
     setName('');
     setTargetAmount('');
     setDuration('monthly');
@@ -116,7 +113,7 @@ export function AddBudget() {
                 >
                   <option value="monthly">Monthly</option>
                   <option value="yearly">Yearly</option>
-                   <option value="yearly">Weekly</option>
+                  <option value="weekly">Weekly</option>
                 </select>
               </div>
             </div>

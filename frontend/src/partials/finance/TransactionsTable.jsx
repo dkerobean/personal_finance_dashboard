@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import TransactionsTableItem from './TransactionsTableItem';
 import EditRecord from '../../utils/EditRecord';
 
-function TransactionsTable({ transactions, currency }) {
+function TransactionsTable({ transactions, currency, fetchTransactions }) {
   const [selectedItems, setSelectedItems] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
@@ -44,6 +44,7 @@ function TransactionsTable({ transactions, currency }) {
           : `${backendUrl}/transactions/expense/${id}/`;
 
         await axios.delete(url, { headers });
+        fetchTransactions();
       }
 
       toast.success('Transactions deleted successfully');
@@ -163,6 +164,7 @@ function TransactionsTable({ transactions, currency }) {
           transaction={editingTransaction}
           modalOpen={editModalOpen}
           setModalOpen={setEditModalOpen}
+          fetchTransactions={fetchTransactions}
         />
       )}
     </div>

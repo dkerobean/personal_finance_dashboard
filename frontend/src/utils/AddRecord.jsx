@@ -3,10 +3,9 @@ import axios from 'axios';
 import ModalBasic from "../components/ModalBasic";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { fetchUserProfile } from "./UserProfile";
 
-export function AddRecord() {
+export function AddRecord( {fetchTransactions, updateProfile } ) {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("income");
   const [amount, setAmount] = useState('');
@@ -21,17 +20,17 @@ export function AddRecord() {
   const token = localStorage.getItem('access_token');
 
   // Fetch user profile
-  useEffect(() => {
-    const getUserProfile = async () => {
-      try {
-        const profile = await fetchUserProfile();
-        setUserId(profile.user.id || '');
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
+  const updateUserProfile = async () => {
+    try {
+      const profile = await fetchUserProfile();
+      setUserId(profile.user.id || '')
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
 
-    getUserProfile();
+  useEffect(() => {
+    updateUserProfile();
   }, []);
 
   // Fetch categories
@@ -65,44 +64,37 @@ export function AddRecord() {
       user: userId
     };
 
+    const url = transactionType === 'income'
+      ? `${backendUrl}/transactions/income/`
+      : `${backendUrl}/transactions/expense/`;
+
     if (transactionType === 'income') {
       data.category = { name: category };
       data.source = incomeSource;
-
-      await axios.post(`${backendUrl}/transactions/income/`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(response => {
-          toast.success('Income recorded successfully');
-        })
-        .catch(error => {
-          toast.error('There was an error recording the income!');
-          console.log(error);
-        });
     } else {
       data.category = { name: category };
-
-      await axios.post(`${backendUrl}/transactions/expense/`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(response => {
-          toast.success('Expense recorded successfully');
-        })
-        .catch(error => {
-          toast.error('There was an error recording the expense!');
-          console.log(error);
-        });
     }
 
-    // Clear form fields after submission
-    setAmount('');
-    setDescription('');
-    setCategory('');
-    setIncomeSource('');
-    setFeedbackModalOpen(false);
+    try {
+      await axios.post(url, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success(`${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} recorded successfully`);
+      updateProfile();
+      fetchTransactions();
 
-    // Refresh the page
-    // window.location.reload();
+      // Clear form fields after submission
+      setAmount('');
+      setDescription('');
+      setCategory('');
+      setIncomeSource('');
+      setFeedbackModalOpen(false);
+      // Update user profile state
+      updateUserProfile();
+    } catch (error) {
+      toast.error(`There was an error recording the ${transactionType}!`);
+      console.error(error);
+    }
   };
 
   return (

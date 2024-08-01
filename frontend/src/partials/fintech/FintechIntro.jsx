@@ -12,7 +12,7 @@ import { AddRecord } from '../../utils/AddRecord';
 
 
 
-function FintechIntro( {profile} ) {
+function FintechIntro( {profile, updateProfile, fetchTransactions} ) {
 
   const userProfile = profile ? profile : '0.00';
   const currency = userProfile ? userProfile.currency_symbol : '$';
@@ -41,8 +41,7 @@ function FintechIntro( {profile} ) {
             <div className="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
 
                  {/* Add Record */}
-                <AddRecord />
-
+                <AddRecord updateProfile={updateProfile} fetchTransactions={fetchTransactions} />
 
               </div>
               {/* <button className="flex justify-center items-center w-9 h-9 rounded-full bg-white border border-slate-200 hover:border-slate-300 text-indigo-500 shadow-sm transition duration-150">

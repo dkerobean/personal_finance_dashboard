@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+
+import { fetchUserProfile } from './UserProfile';
 
 export function EditBudgetModal({ budget, isOpen, onClose, fetchBudgets }) {
   const [name, setName] = useState(budget.name || '');
@@ -7,8 +9,23 @@ export function EditBudgetModal({ budget, isOpen, onClose, fetchBudgets }) {
   const [isActive, setIsActive] = useState(budget.is_active || false);
   const [userId, setUserId] = useState('');
 
+
+useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const profile = await fetchUserProfile();
+        setUserId(profile.user.id || '');
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    getUserProfile();
+  }, []); 
+
+  console.log(userId);
+
   if (!isOpen) return null;
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +43,7 @@ export function EditBudgetModal({ budget, isOpen, onClose, fetchBudgets }) {
           name,
           target_amount: targetAmount,
           is_active: isActive,
-          user: userID
+          user: userId
         }),
       });
 

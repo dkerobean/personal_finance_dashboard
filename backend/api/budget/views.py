@@ -34,7 +34,7 @@ class BudgetView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_401_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         budget = get_object_or_404(Budget, id=pk, user=request.user)
@@ -49,6 +49,3 @@ class BudgetDetailView(APIView):
         budget = get_object_or_404(Budget, id=pk, user=request.user)
         serializer = BudgetSerializer(budget)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-

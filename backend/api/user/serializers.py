@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import CustomUser, Profile
 
+
 class RegistrationSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
 
@@ -25,7 +26,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        confirm_password = validated_data.pop('confirm_password', None)
+        confirm_password = validated_data.pop('confirm_password', None) # noqa
 
         user = CustomUser.objects.create_user(
             email=validated_data['email'],

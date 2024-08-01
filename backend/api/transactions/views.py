@@ -4,7 +4,8 @@ from rest_framework import status
 from .serializers import (IncomeSerializer, ExpenseSerializer,
                           IncomeCategorySerializer, ExpenseCategorySerializer)
 from rest_framework.permissions import IsAuthenticated
-from user.models import Income, Expense, IncomeCategory, ExpenseCategory, Profile, NetWorth
+from user.models import (Income, Expense, IncomeCategory, ExpenseCategory,
+                         Profile, NetWorth)
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
 from django.utils import timezone
@@ -139,8 +140,10 @@ class CashflowView(APIView):
         six_months_ago = today - timedelta(days=180)
 
         # Get expenses and income for the last six months
-        expenses = Expense.objects.filter(user=user, date__gte=six_months_ago).values('date__month').annotate(total=Sum('amount')).order_by('date__month')
-        income = Income.objects.filter(user=user, date__gte=six_months_ago).values('date__month').annotate(total=Sum('amount')).order_by('date__month')
+        expenses = Expense.objects.filter(user=user,
+                                          date__gte=six_months_ago).values('date__month').annotate(total=Sum('amount')).order_by('date__month') # noqa
+        income = Income.objects.filter(user=user,
+                                       date__gte=six_months_ago).values('date__month').annotate(total=Sum('amount')).order_by('date__month') # noqa
 
         data = {
             'labels': [],
@@ -181,13 +184,16 @@ class BalanceTrendView(APIView):
         # Calculate start and end dates for the current month
         today = timezone.now().date()
         start_date = today.replace(day=1)
-        end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+        end_date = (start_date +
+                    timedelta(days=31)).replace(day=1) - timedelta(days=1)
 
         # Generate a list of dates for the current month
-        date_list = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+        date_list = [start_date +
+                     timedelta(days=i) for i in range((end_date - start_date).days + 1)] # noqa
 
         # Fetch net worths for the current month
-        net_worths = NetWorth.objects.filter(user=user, date__range=[start_date, end_date]).order_by('date')
+        net_worths = NetWorth.objects.filter(user=user,
+                                             date__range=[start_date, end_date]).order_by('date') # noqa
         records_dict = {record.date: record.net_worth for record in net_worths}
 
         # Prepare data for the response
@@ -195,7 +201,7 @@ class BalanceTrendView(APIView):
         for date in date_list:
             result.append({
                 "date": date.strftime('%Y-%m-%d'),
-                "balance": records_dict.get(date, 0)  # Use 0 if no record exists for that date
+                "balance": records_dict.get(date, 0)
             })
 
         return Response(result, status=status.HTTP_200_OK)

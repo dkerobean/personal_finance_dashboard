@@ -25,10 +25,12 @@ class LogoutAPIView(APIView):
             return Response({"message": "Successfully logged out."},
                             status=status.HTTP_205_RESET_CONTENT)
         except TokenError as e:
-            return Response({"error": "Invalid or expired token.", "details": str(e)},
+            return Response({"error": "Invalid or expired token.",
+                             "details": str(e)},
                             status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": "Something went wrong.", "details": str(e)},
+            return Response({"error": "Something went wrong.",
+                             "details": str(e)},
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -44,13 +46,11 @@ class UserProfileView(APIView):
         profile = request.user.profile
 
         if request.user != profile.user:
-            return Response({"detail": "You do not have permission to perform this action."},
+            return Response({"detail": "You do not have permission to perform this action."}, # noqa
                             status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True) # noqa
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-

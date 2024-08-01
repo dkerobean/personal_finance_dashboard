@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from user.models import Income, Expense, IncomeCategory, ExpenseCategory, Budget
+from user.models import (Income, Expense,
+                         IncomeCategory, ExpenseCategory,
+                         Budget)
 
 
 class IncomeCategorySerializer(serializers.ModelSerializer):
@@ -19,18 +21,20 @@ class IncomeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Income
-        fields = ['id', 'amount', 'category', 'source', 'date', 'description', 'user', 'transaction_type']
+        fields = ['id', 'amount', 'category', 'source',
+                  'date', 'description', 'user',
+                  'transaction_type']
 
     def create(self, validated_data):
         category_data = validated_data.pop('category')
-        category, created = IncomeCategory.objects.get_or_create(**category_data)
+        category, created = IncomeCategory.objects.get_or_create(**category_data) # noqa
         income = Income.objects.create(category=category, **validated_data)
         return income
 
     def update(self, instance, validated_data):
         category_data = validated_data.pop('category', None)
         if category_data:
-            category, created = IncomeCategory.objects.get_or_create(**category_data)
+            category, created = IncomeCategory.objects.get_or_create(**category_data) # noqa
             instance.category = category
 
         for attr, value in validated_data.items():
@@ -45,18 +49,19 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Expense
-        fields = ['id', 'user', 'amount', 'category', 'date', 'description', 'transaction_type']
+        fields = ['id', 'user', 'amount', 'category',
+                  'date', 'description', 'transaction_type']
 
     def create(self, validated_data):
         category_data = validated_data.pop('category')
-        category, created = ExpenseCategory.objects.get_or_create(**category_data)
+        category, created = ExpenseCategory.objects.get_or_create(**category_data) # noqa
         expense = Expense.objects.create(category=category, **validated_data)
         return expense
 
     def update(self, instance, validated_data):
         category_data = validated_data.pop('category', None)
         if category_data:
-            category, created = ExpenseCategory.objects.get_or_create(**category_data)
+            category, created = ExpenseCategory.objects.get_or_create(**category_data) # noqa
             instance.category = category
 
         for attr, value in validated_data.items():

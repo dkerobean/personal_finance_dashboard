@@ -48,7 +48,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Profile(models.Model):
-    profile_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    profile_id = models.UUIDField(default=uuid.uuid4, unique=True,
+                                  editable=False)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=255)
     date_of_birth = models.DateField(null=True, blank=True)
@@ -60,18 +61,19 @@ class Profile(models.Model):
                                        blank=True)
     net_worth = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     cash_flow = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    total_spending = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_spending = models.DecimalField(max_digits=15, decimal_places=2,
+                                         default=0)
 
     def __str__(self):
         return self.user.username
 
     def calculate_cash_flow(self):
-        total_income = self.user.incomes.aggregate(total=models.Sum('amount'))['total'] or 0
-        total_expenses = self.user.expenses.aggregate(total=models.Sum('amount'))['total'] or 0
+        total_income = self.user.incomes.aggregate(total=models.Sum('amount'))['total'] or 0 # noqa
+        total_expenses = self.user.expenses.aggregate(total=models.Sum('amount'))['total'] or 0 # noqa
         return total_income - total_expenses
 
     def calculate_total_spending(self):
-        return self.user.expenses.aggregate(total=models.Sum('amount'))['total'] or 0
+        return self.user.expenses.aggregate(total=models.Sum('amount'))['total'] or 0 # noqa
 
     def update_financials(self):
         self.cash_flow = self.calculate_cash_flow()
@@ -83,16 +85,18 @@ class Profile(models.Model):
         current_year = datetime.now().year
 
         # Filter expenses for the current month and year
-        top_expenses = self.user.expenses.filter(date__month=current_month, date__year=current_year) \
+        top_expenses = self.user.expenses.filter(date__month=current_month,
+                                                 date__year=current_year) \
             .values('category__name') \
             .annotate(total=Sum('amount')) \
             .order_by('-total')[:4]
 
         # Calculate the total of the top expenses
-        total_sum = top_expenses.aggregate(total_sum=Sum('total'))['total_sum'] or 0
+        total_sum = top_expenses.aggregate(total_sum=Sum('total'))['total_sum'] or 0 # noqa
 
         # Format the response
-        result = [{'category': expense['category__name'], 'total': expense['total']} for expense in top_expenses]
+        result = [{'category': expense['category__name'],
+                   'total': expense['total']} for expense in top_expenses]
 
         return {'top_expenses': result, 'total': total_sum}
 
@@ -114,25 +118,31 @@ class ExpenseCategory(models.Model):
 
 
 class Income(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='incomes')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                             related_name='incomes')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.ForeignKey(IncomeCategory, on_delete=models.SET_NULL, null=True, related_name='incomes')
+    category = models.ForeignKey(IncomeCategory, on_delete=models.SET_NULL,
+                                 null=True, related_name='incomes')
     source = models.CharField(max_length=100)
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
-    transaction_type = models.CharField(max_length=20, default='income', null=True)
+    transaction_type = models.CharField(max_length=20, default='income',
+                                        null=True)
 
     def __str__(self):
         return str(self.amount)
 
 
 class Expense(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='expenses')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                             related_name='expenses')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='expenses')
+    category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL,
+                                 null=True, related_name='expenses')
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
-    transaction_type = models.CharField(max_length=20, default='expense', null=True)
+    transaction_type = models.CharField(max_length=20, default='expense',
+                                        null=True)
 
     def __str__(self):
         return str(self.amount)
@@ -145,24 +155,26 @@ class Budget(models.Model):
         ('yearly', 'Yearly'),
     ]
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='budgets')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                             related_name='budgets')
     name = models.CharField(max_length=255, null=True, blank=True)
-    # category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True, related_name='budgets')
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    spent_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    spent_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                       default=0)
     start_date = models.DateField(default=timezone.now().date())
     end_date = models.DateField(null=True, blank=True)
-    duration = models.CharField(max_length=10, choices=DURATION_CHOICES, default='monthly')
+    duration = models.CharField(max_length=10, choices=DURATION_CHOICES,
+                                default='monthly')
     is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         if not self.end_date:
             if self.duration == 'weekly':
-                self.end_date = self.start_date + timedelta(weeks=1) - timedelta(days=1)
+                self.end_date = self.start_date + timedelta(weeks=1) - timedelta(days=1) # noqa
             elif self.duration == 'monthly':
-                self.end_date = (self.start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+                self.end_date = (self.start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1) # noqa
             elif self.duration == 'yearly':
-                self.end_date = self.start_date.replace(year=self.start_date.year + 1) - timedelta(days=1)
+                self.end_date = self.start_date.replace(year=self.start_date.year + 1) - timedelta(days=1) # noqa
         self.is_active = self.end_date >= timezone.now().date()
         super().save(*args, **kwargs)
         self.update_spent_amount()
@@ -189,7 +201,8 @@ class Budget(models.Model):
 
 
 class NetWorth(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='net_worths')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                             related_name='net_worths')
     date = models.DateField(auto_now_add=True)
     net_worth = models.DecimalField(max_digits=15, decimal_places=2)
 
@@ -200,4 +213,3 @@ class NetWorth(models.Model):
         net_worth = total_income - total_expenses
         net_worth_record = cls.objects.create(user=user, net_worth=net_worth)
         return net_worth_record
-

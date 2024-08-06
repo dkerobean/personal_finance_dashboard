@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'user',
     'transactions',
     'budget',
+    'ml_models',
 ]
 
 MIDDLEWARE = [

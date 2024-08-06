@@ -22,4 +22,5 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('transactions/', include('transactions.urls')),
     path('budget/', include('budget.urls')),
+    path('ai/', include('ml_models.urls')),
 ]

@@ -5,6 +5,8 @@ from rest_framework import status
 from .tf_models import ExpensePredictionModel, AnomalyDetectionModel, IncomeTrendAnalysisModel
 from rest_framework.permissions import IsAuthenticated
 from user.models import Income, Expense
+from datetime import datetime
+
 
 class ExpensePredictionView(APIView):
     permission_classes = [IsAuthenticated]
@@ -33,10 +35,14 @@ class AnomalyDetectionView(APIView):
         model = AnomalyDetectionModel()
         model.train(user)
 
-        expenses = Expense.objects.filter(user=user)
+        current_month = datetime.now().month
+        expenses = Expense.objects.filter(user=user, date__month=current_month)
         amounts = [float(expense.amount) for expense in expenses]
 
-        anomalies = model.detect_anomalies(amounts)
+        if len(amounts) < 2:
+            return Response({"error": "Not enough data for anomaly detection"}, status=status.HTTP_400_BAD_REQUEST)
+
+        anomalies = model.detect_anomalies(np.array(amounts))
 
         return Response({
             'anomalies': anomalies.tolist()

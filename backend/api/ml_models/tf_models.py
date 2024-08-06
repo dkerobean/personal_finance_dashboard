@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 from user.models import Expense, NetWorth, Income
-
+from datetime import datetime
 
 class ExpensePredictionModel:
     def __init__(self):
@@ -36,14 +36,20 @@ class AnomalyDetectionModel:
         self.model.compile(optimizer='adam', loss='binary_crossentropy')
 
     def train(self, user):
-        expenses = Expense.objects.filter(user=user)
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        expenses = Expense.objects.filter(user=user, date__month=current_month, date__year=current_year)
         amounts = np.array([float(expense.amount) for expense in expenses])
 
-        self.model.fit(amounts, np.zeros_like(amounts), epochs=50, verbose=0)
+        if len(amounts) < 2:
+            return
+
+        self.model.fit(amounts.reshape(-1, 1), np.zeros_like(amounts), epochs=50, verbose=0)
 
     def detect_anomalies(self, amounts):
-        anomaly_scores = self.model.predict(amounts)
-        return amounts[anomaly_scores > 0.5]
+        amounts_array = np.array(amounts).reshape(-1, 1)  # Ensure the input is a 2D array
+        anomaly_scores = self.model.predict(amounts_array)
+        return np.array(amounts)[anomaly_scores.flatten() > 0.5]  # Flatten anomaly_scores for comparison
 
 
 class NetWorthForecastingModel:

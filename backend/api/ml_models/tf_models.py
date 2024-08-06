@@ -5,6 +5,7 @@ import numpy as np
 from user.models import Expense, NetWorth, Income
 from datetime import datetime
 
+
 class ExpensePredictionModel:
     def __init__(self):
         self.model = keras.Sequential([

@@ -2,10 +2,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .tf_models import ExpensePredictionModel, AnomalyDetectionModel, IncomeTrendAnalysisModel
+from .tf_models import ExpensePredictionModel, AnomalyDetectionModel, IncomeTrendAnalysisModel, NetWorthForecastingModel
 from rest_framework.permissions import IsAuthenticated
 from user.models import Income, Expense
 from datetime import datetime
+import numpy as np
 
 
 class ExpensePredictionView(APIView):
@@ -40,7 +41,8 @@ class AnomalyDetectionView(APIView):
         amounts = [float(expense.amount) for expense in expenses]
 
         if len(amounts) < 2:
-            return Response({"error": "Not enough data for anomaly detection"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Not enough data for anomaly detection"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         anomalies = model.detect_anomalies(np.array(amounts))
 

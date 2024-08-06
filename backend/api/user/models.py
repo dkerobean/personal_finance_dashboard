@@ -54,7 +54,7 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=255)
     date_of_birth = models.DateField(null=True, blank=True)
     address = models.TextField(null=True, blank=True)
-    phone_number = models.CharField(max_length=15, null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     currency_symbol = models.CharField(max_length=5, default='₵', null=True,

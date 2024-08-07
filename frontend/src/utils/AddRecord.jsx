@@ -80,7 +80,6 @@ export function AddRecord( {fetchTransactions, updateProfile } ) {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success(`${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} recorded successfully`);
-      updateProfile();
       fetchTransactions();
 
       // Clear form fields after submission

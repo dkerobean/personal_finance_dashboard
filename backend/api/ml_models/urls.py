@@ -3,8 +3,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('predict-expenses/', views.ExpensePredictionView.as_view(), name='predict_expenses'),
-    path('detect-anomalies/', views.AnomalyDetectionView.as_view(), name='detect_anomalies'),
-    path('net-worth-forecast/', views.NetWorthForecastingView.as_view(), name='net_worth_forecast'),
-    path('income-trend-analysis/', views.IncomeTrendAnalysisView.as_view(), name='income_trend_analysis'),
+    path('expense-prediction/', views.ExpensePredictionView.as_view(), name='expense-prediction'),
+    path('financial-health-score/', views.FinancialHealthScoreView.as_view(), name='financial-health-score'),
+    path('smart-budget-recommendation/', views.SmartBudgetRecommendationView.as_view(), name='smart-budget-recommendation'),
+
+    path('predictive-insights/', views.PredictiveInsightsView.as_view(), name='predictive-insights'),
+
+    path('train-all-models/', views.TrainAllModelsView.as_view(), name='train-all-models'),
+
 ]

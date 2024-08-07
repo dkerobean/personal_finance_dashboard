@@ -1,11 +1,10 @@
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .tf_models import ExpensePredictionModel, AnomalyDetectionModel, IncomeTrendAnalysisModel, NetWorthForecastingModel
+from .tf_models import ExpensePredictionModel, FinancialHealthScoreModel, SmartBudgetRecommendationModel, PredictiveInsightsModel, ExpenseCategorizationModel
 from rest_framework.permissions import IsAuthenticated
-from user.models import Income, Expense
-from datetime import datetime
+from user.models import Income, Expense, NetWorth, CustomUser
+from datetime import datetime, timedelta
 import numpy as np
 
 
@@ -15,87 +14,70 @@ class ExpensePredictionView(APIView):
     def get(self, request):
         user = request.user
         model = ExpensePredictionModel()
-        model.train(user)
 
-        last_expense = Expense.objects.filter(user=user).order_by('-date').first()
-        if not last_expense:
-            return Response({"error": "No expense data available"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            prediction = model.predict(user)
+            return Response({'prediction': prediction.tolist()})
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
 
-        prediction = model.predict(float(last_expense.amount))
-
-        return Response({
-            'predicted_expense': float(prediction[0][0])
-        })
-
-
-class AnomalyDetectionView(APIView):
+class FinancialHealthScoreView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
-        model = AnomalyDetectionModel()
-        model.train(user)
+        model = FinancialHealthScoreModel()
 
-        current_month = datetime.now().month
-        expenses = Expense.objects.filter(user=user, date__month=current_month)
-        amounts = [float(expense.amount) for expense in expenses]
+        model.train([user])
 
-        if len(amounts) < 2:
-            return Response({"error": "Not enough data for anomaly detection"},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        anomalies = model.detect_anomalies(np.array(amounts))
-
-        return Response({
-            'anomalies': anomalies.tolist()
-        })
+        health_score = model.predict_health_score(user)
+        return Response({"financial_health_score": health_score})
 
 
-class NetWorthForecastingView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    # def get(self, request):
-    #     user = request.user
-    #     model = NetWorthForecastingModel()
-    #     model.train(user)
-
-    #     last_net_worth = user.net_worths.all().order_by('-date').first()
-    #     if not last_net_worth:
-    #         return Response({"error": "No net worth data available"}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     prediction = model.predict(float(last_net_worth.net_worth))
-
-    #     return Response({
-    #         'predicted_net_worth': float(prediction[0][0])
-    #     })
-
-    def get(self, request):
-        user = request.user
-        periods = int(request.query_params.get('periods', 12))
-
-        model = NetWorthForecastingModel()
-        model.train(user)
-        forecasts = model.forecast(user, periods)
-
-        return Response({'net_worth_forecast': forecasts})
-
-
-class IncomeTrendAnalysisView(APIView):
+class SmartBudgetRecommendationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
-        model = IncomeTrendAnalysisModel()
-        model.train(user)
+        model = SmartBudgetRecommendationModel()
+        expected_income = float(request.query_params.get('expected_income', 0))
 
-        last_income = Income.objects.filter(user=user).order_by('-date').first()
-        if not last_income:
-            return Response({"error": "No income data available"}, status=status.HTTP_400_BAD_REQUEST)
-
-        prediction = model.predict(float(last_income.amount))
-
-        return Response({
-            'predicted_income': float(prediction[0][0])
-        })
+        try:
+            recommendation = model.recommend_budget(user, expected_income)
+            return Response({'recommendation': recommendation})
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
 
 
+class PredictiveInsightsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        model = PredictiveInsightsModel()
+
+        try:
+            prediction = model.predict(user)
+            return Response({'prediction': prediction.tolist()})
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+class TrainAllModelsView(APIView):
+    def post(self, request, *args, **kwargs):
+        user = request.user  # Assumes the user is authenticated and provided
+
+        # Initialize models
+        expense_categorization_model = ExpenseCategorizationModel()
+        predictive_insights_model = PredictiveInsightsModel()
+        smart_budget_recommendation_model = SmartBudgetRecommendationModel()
+
+        try:
+            # Train each model
+            expense_categorization_model.train(user)
+            predictive_insights_model.train(user)
+            smart_budget_recommendation_model.train(user)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({'status': 'success', 'message': 'All models trained successfully.'}, status=status.HTTP_200_OK)

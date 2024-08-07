@@ -47,28 +47,37 @@ function DropdownProfile({
 
   // Logout
 
-  const handleLogout = async () => {
-    try {
-      const refreshToken = localStorage.getItem('refresh_token');
-      await axios.post(`${backendUrl}/user/logout/`, {
-        refreshToken: refreshToken
-      });
+const handleLogout = async () => {
+  try {
+    const accessToken = localStorage.getItem('access_token');
+    const refreshToken = localStorage.getItem('refresh_token');
 
-      toast.success('Logged out');
+    await axios.post(`${backendUrl}/user/logout/`,
+      { refresh_token: refreshToken },  // Send refresh token in the request body
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`, // Send access token in the Authorization header
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
-      console.log('logged out');
+    toast.success('Logged out');
+
+    // Cleanup tokens and redirect
+    setTimeout(() => {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-
       navigate('/signin');
+    }, 1000);
 
-    } catch (error) {
-      toast.error("Error signing out: " + error.message);
-    }
+    console.log('Logged out');
+
+  } catch (error) {
+    console.log(error);
+    toast.error("Error signing out: " + error.message);
   }
+}
 
   // close if the esc key is pressed
   useEffect(() => {

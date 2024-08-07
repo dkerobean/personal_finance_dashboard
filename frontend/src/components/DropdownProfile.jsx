@@ -53,10 +53,10 @@ const handleLogout = async () => {
     const refreshToken = localStorage.getItem('refresh_token');
 
     await axios.post(`${backendUrl}/user/logout/`,
-      { refresh_token: refreshToken },  // Send refresh token in the request body
+      { refresh_token: refreshToken },
       {
         headers: {
-          'Authorization': `Bearer ${accessToken}`, // Send access token in the Authorization header
+          'Authorization': `Bearer ${accessToken}`, 
           'Content-Type': 'application/json'
         }
       }

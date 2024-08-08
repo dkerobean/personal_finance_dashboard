@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import TransactionsTableItem from './TransactionsTableItem';
 import EditRecord from '../../utils/EditRecord';
+import ConfirmationModal from '../../utils/ConfirmModal';
 
 function TransactionsTable({ transactions, currency, fetchTransactions }) {
   const [selectedItems, setSelectedItems] = useState([]);
@@ -10,6 +11,7 @@ function TransactionsTable({ transactions, currency, fetchTransactions }) {
   const [showUpdate, setShowUpdate] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false); // State for confirmation modal
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const token = localStorage.getItem('access_token');
@@ -28,10 +30,6 @@ function TransactionsTable({ transactions, currency, fetchTransactions }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete the selected transactions?')) {
-      return;
-    }
-
     const headers = {
       Authorization: `Bearer ${token}`,
     };
@@ -55,6 +53,7 @@ function TransactionsTable({ transactions, currency, fetchTransactions }) {
     setSelectedItems([]);
     setShowOptions(false);
     setShowUpdate(false);
+    setConfirmDeleteModalOpen(false); // Close the modal after deletion
   };
 
   const handleUpdate = async () => {
@@ -105,7 +104,7 @@ function TransactionsTable({ transactions, currency, fetchTransactions }) {
             )}
             <button
               className="btn bg-red-500 hover:bg-red-600 text-white"
-              onClick={handleDelete}
+              onClick={() => setConfirmDeleteModalOpen(true)} // Open modal for confirmation
             >
               Delete
             </button>
@@ -167,6 +166,12 @@ function TransactionsTable({ transactions, currency, fetchTransactions }) {
           fetchTransactions={fetchTransactions}
         />
       )}
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmDeleteModalOpen}
+        onClose={() => setConfirmDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

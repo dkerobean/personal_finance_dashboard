@@ -148,6 +148,17 @@ class Expense(models.Model):
         return str(self.amount)
 
 
+class Message(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                             related_name='messages')
+    content = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Message to {self.user.username}'
+
+
 class Budget(models.Model):
     DURATION_CHOICES = [
         ('weekly', 'Weekly'),
@@ -182,11 +193,11 @@ class Budget(models.Model):
     def update_spent_amount(self):
         total_spent = Expense.objects.filter(
             user=self.user,
-            # category=self.category,
             date__range=[self.start_date, self.end_date]
         ).aggregate(total=models.Sum('amount'))['total'] or 0
         self.spent_amount = total_spent
         super().save()
+        self.check_and_send_alerts()
 
     @property
     def remaining_amount(self):
@@ -198,6 +209,18 @@ class Budget(models.Model):
 
     def __str__(self):
         return self.name or 'Unamed Budget'
+
+    # Budget Alerts
+    def create_budget_alert(self, percentage):
+        content = f'Your budget has reached {percentage}% of the limit.'
+        Message.objects.create(user=self.user, content=content)
+
+    def check_and_send_alerts(self):
+        spent_percentage = self.spent_percentage
+        if spent_percentage >= 100:
+            self.create_budget_alert(100)
+        elif spent_percentage >= 90:
+            self.create_budget_alert(90)
 
 
 class NetWorth(models.Model):
@@ -213,3 +236,4 @@ class NetWorth(models.Model):
         net_worth = total_income - total_expenses
         net_worth_record = cls.objects.create(user=user, net_worth=net_worth)
         return net_worth_record
+

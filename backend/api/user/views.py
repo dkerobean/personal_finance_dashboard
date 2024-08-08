@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegistrationSerializer, UserProfileSerializer
+from .serializers import (RegistrationSerializer, UserProfileSerializer,
+                          MessageSerializer)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import IsAuthenticated
+from .models import Message
 
 
 class RegistrationAPIView(APIView):
@@ -54,3 +56,13 @@ class UserProfileView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        message = Message.objects.filter(user=request.user)
+        serializer = MessageSerializer(message, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

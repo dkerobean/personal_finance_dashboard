@@ -56,7 +56,7 @@ const handleLogout = async () => {
       { refresh_token: refreshToken },
       {
         headers: {
-          'Authorization': `Bearer ${accessToken}`, 
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         }
       }

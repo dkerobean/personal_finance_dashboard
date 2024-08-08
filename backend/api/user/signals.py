@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db.models import Sum
-from .models import CustomUser, Profile, Expense, Income, NetWorth, Budget
+from .models import (CustomUser, Profile, Expense, Income,
+                     NetWorth, Budget, Message)
 
 
 @receiver(post_save, sender=CustomUser)
@@ -57,3 +58,10 @@ def update_budget_on_expense_change(sender, instance, **kwargs):
             ).aggregate(total=Sum('amount'))['total'] or 0
             budget.spent_amount = total_spent
             budget.save()
+
+
+# delete notifications if budget is deleted
+@receiver(post_delete, sender=Budget)
+def delete_related_messages(sender, instance, **kwargs):
+    # Delete all messages related to the deleted budget
+    Message.objects.filter(user=instance.user, content__contains=instance.name).delete()  # noqa

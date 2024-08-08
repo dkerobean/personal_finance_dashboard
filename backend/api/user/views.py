@@ -65,4 +65,3 @@ class UserMessageView(APIView):
         message = Message.objects.filter(user=request.user)
         serializer = MessageSerializer(message, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-

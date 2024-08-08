@@ -168,7 +168,7 @@ class Budget(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
                              related_name='budgets')
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True, unique=True)
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     spent_amount = models.DecimalField(max_digits=10, decimal_places=2,
                                        default=0)
@@ -212,7 +212,7 @@ class Budget(models.Model):
 
     # Budget Alerts
     def create_budget_alert(self, percentage):
-        content = f'Your budget has reached {percentage}% of the limit.'
+        content = f'Your {self.name} budget has reached {percentage}% of the limit.' # noqa
         Message.objects.create(user=self.user, content=content)
 
     def check_and_send_alerts(self):
@@ -236,4 +236,3 @@ class NetWorth(models.Model):
         net_worth = total_income - total_expenses
         net_worth_record = cls.objects.create(user=user, net_worth=net_worth)
         return net_worth_record
-

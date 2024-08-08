@@ -109,8 +109,15 @@ function Budgets() {
                           <div className="text-sm">${budget.spent_amount} / ${budget.target_amount}</div>
                         </div>
                         {/* Budget status */}
-                        <div className="col-span-6 order-2 sm:order-none sm:col-span-2 text-right lg:sidebar-expanded:hidden xl:sidebar-expanded:block">
-                          <div className="text-xs inline-flex font-medium bg-emerald-100 text-emerald-600 rounded-full text-center px-2.5 py-1">
+                        {/* Budget status */}
+                        <div className={`col-span-6 order-2 sm:order-none sm:col-span-2 text-right lg:sidebar-expanded:hidden xl:sidebar-expanded:block`}>
+                          <div
+                            className={`text-xs inline-flex font-medium ${
+                              budget.is_active
+                                ? 'bg-emerald-100 text-emerald-600'
+                                : 'bg-rose-100 text-rose-600'
+                            } rounded-full text-center px-2.5 py-1`}
+                          >
                             {budget.is_active ? 'Active' : 'Inactive'}
                           </div>
                         </div>

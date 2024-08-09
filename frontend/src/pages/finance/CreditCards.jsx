@@ -4,12 +4,14 @@ import Header from '../../partials/Header';
 
 import { AddBudget } from '../../utils/AddBudget';
 import { EditBudgetModal } from '../../utils/EditBudget';
+import ConfirmationModal from '../../utils/ConfirmModal';
 
 function Budgets() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [budgets, setBudgets] = useState([]);
   const [selectedBudget, setSelectedBudget] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false); // State for confirmation modal
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -36,9 +38,6 @@ function Budgets() {
     if (!selectedBudget) return;
 
     const accessToken = localStorage.getItem('access_token');
-    const confirmDelete = window.confirm('Are you sure you want to delete this budget?');
-
-    if (!confirmDelete) return;
 
     try {
       await fetch(`${backendUrl}/budget/edit/${selectedBudget.id}/`, {
@@ -51,6 +50,7 @@ function Budgets() {
       // Remove the deleted budget from state
       setBudgets(budgets.filter(budget => budget.id !== selectedBudget.id));
       setSelectedBudget(null);
+      setConfirmDeleteModalOpen(false); // Close the modal after deletion
     } catch (error) {
       console.error('Error deleting budget:', error);
     }
@@ -109,8 +109,14 @@ function Budgets() {
                           <div className="text-sm">${budget.spent_amount} / ${budget.target_amount}</div>
                         </div>
                         {/* Budget status */}
-                        <div className="col-span-6 order-2 sm:order-none sm:col-span-2 text-right lg:sidebar-expanded:hidden xl:sidebar-expanded:block">
-                          <div className="text-xs inline-flex font-medium bg-emerald-100 text-emerald-600 rounded-full text-center px-2.5 py-1">
+                        <div className={`col-span-6 order-2 sm:order-none sm:col-span-2 text-right lg:sidebar-expanded:hidden xl:sidebar-expanded:block`}>
+                          <div
+                            className={`text-xs inline-flex font-medium ${
+                              budget.is_active
+                                ? 'bg-emerald-100 text-emerald-600'
+                                : 'bg-rose-100 text-rose-600'
+                            } rounded-full text-center px-2.5 py-1`}
+                          >
                             {budget.is_active ? 'Active' : 'Inactive'}
                           </div>
                         </div>
@@ -179,7 +185,7 @@ function Budgets() {
                           </button>
                         </div>
                         <div className="w-1/2">
-                          <button className="btn w-full border-slate-200 hover:border-slate-300 text-rose-500" onClick={handleDelete}>
+                          <button className="btn w-full border-slate-200 hover:border-slate-300 text-rose-500" onClick={() => setConfirmDeleteModalOpen(true)}>
                             <svg className="w-4 h-4 fill-current text-rose-500 shrink-0" viewBox="0 0 16 16">
                               <path d="M11 7h1v7H4V7h1v6h6V7z" />
                               <path d="M9 3v1H7V3h2m1-1H6v3h4V2zM2 4h12v1H2z" />
@@ -195,6 +201,13 @@ function Budgets() {
                         onClose={handleCloseEditModal}
                         budget={selectedBudget}
                         fetchBudgets={fetchBudgets}
+                      />
+
+                      {/* Confirmation Modal */}
+                      <ConfirmationModal
+                        isOpen={confirmDeleteModalOpen}
+                        onClose={() => setConfirmDeleteModalOpen(false)}
+                        onConfirm={handleDelete}
                       />
 
                     </div>

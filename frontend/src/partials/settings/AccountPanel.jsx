@@ -89,14 +89,14 @@ function AccountPanel({ profile }) {
         <h2 className="text-2xl text-slate-800 font-bold mb-5">My Account</h2>
 
         {/* Picture */}
-        <section>
+        {/* <section>
           <div className="flex items-center">
             <div className="mr-4">
               <img className="w-20 h-20 rounded-full" src={Image} width="80" height="80" alt="User upload" />
             </div>
             <button className="btn-sm bg-indigo-500 hover:bg-indigo-600 text-white">Change</button>
           </div>
-        </section>
+        </section> */}
 
         {/* Account Form */}
         <form onSubmit={handleFormSubmit}>

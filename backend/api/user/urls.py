@@ -13,4 +13,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # noqa
 
     path('profile/view/', views.UserProfileView.as_view(), name='user_profile'), # noqa
+
+    path('messages/', views.UserMessageView.as_view(), name='user-messages'), # noqa
 ]

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Profile
+from .models import CustomUser, Profile, Message
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -66,3 +66,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(user_serializer.errors)
 
         return super().update(instance, validated_data)
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'content', 'is_read', 'created_at']

@@ -17,7 +17,7 @@ class BudgetView(APIView):
         return super().dispatch(*args, **kwargs)
 
     def get(self, request):
-        budgets = Budget.objects.all()
+        budgets = Budget.objects.filter(user=request.user)
         serializer = BudgetSerializer(budgets, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

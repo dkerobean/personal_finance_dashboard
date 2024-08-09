@@ -15,6 +15,13 @@ function WelcomeBanner() {
       });
   }, [navigate]);
 
+  // Determine greeting based on the time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   return (
     <div className="relative bg-indigo-200 p-4 sm:p-6 rounded-sm overflow-hidden mb-8">
@@ -63,7 +70,7 @@ function WelcomeBanner() {
       {/* Content */}
       <div className="relative">
         <h1 className="text-2xl md:text-3xl text-slate-800 font-bold mb-1">
-          Good afternoon, {userProfile ? userProfile.full_name : ''}👋
+          {getGreeting()}, {userProfile ? userProfile.full_name : ''}👋
         </h1>
         <p>Here is what’s happening with your finances today:</p>
       </div>

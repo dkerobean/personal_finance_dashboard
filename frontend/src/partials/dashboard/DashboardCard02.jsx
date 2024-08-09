@@ -82,7 +82,7 @@ function DashboardCard02( {cash_flow, currency} ) {
         <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Sales</div>
         <div className="flex items-start">
           <div className="text-3xl font-bold text-slate-800 mr-2">{currency}{cash_flow}</div>
-          <div className="text-sm font-semibold text-white px-1.5 bg-amber-500 rounded-full">-14%</div>
+          {/* <div className="text-sm font-semibold text-white px-1.5 bg-amber-500 rounded-full">-14%</div> */}
         </div>
       </div>
       {/* Chart built with Chart.js 3 */}

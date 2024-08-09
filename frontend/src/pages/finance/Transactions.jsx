@@ -87,9 +87,9 @@ function Transactions() {
               </div>
               <div className="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
                 <DeleteButton selectedItems={selectedItems} />
-                <div className="hidden sm:block">
+                {/* <div className="hidden sm:block">
                   <SearchForm />
-                </div>
+                </div> */}
                 <div className="hidden sm:block ">
                   <AddRecord fetchTransactions={fetchTransactions} />
                 </div>
@@ -97,10 +97,10 @@ function Transactions() {
                 {/* <button className="btn bg-indigo-500 hover:bg-indigo-600 text-white">Export Transactions</button> */}
               </div>
             </div>
-            <div className="mb-5">
+            {/* <div className="mb-5">
               <span>Transactions from </span>
               <DropdownTransaction />
-            </div>
+            </div> */}
             <div className="mb-5">
               <ul className="flex flex-wrap -m-1">
                 <li className="m-1">

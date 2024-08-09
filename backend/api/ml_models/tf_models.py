@@ -38,32 +38,27 @@ class FinancialHealthScoreModel:
 
     def _extract_features(self, user):
         profile = user.profile
-        income = float(self._get_average_monthly_income(user))
-        expenses = float(self._get_average_monthly_expenses(user))
+        income = float(self._get_total_income(user))
+        expenses = float(self._get_total_expenses(user))
         savings_rate = (income - expenses) / income if income > 0 else 0
         net_worth = float(profile.net_worth)
         cash_flow = float(profile.cash_flow)
         total_spending = float(profile.total_spending)
         return [income, expenses, savings_rate, net_worth, cash_flow, total_spending]
 
-    def _get_average_monthly_income(self, user):
-        end_date = timezone.now()
-        start_date = end_date - timedelta(days=365)
-        avg_income = Income.objects.filter(user=user, date__range=[start_date, end_date]).aggregate(Avg('amount'))['amount__avg']
-        return float(avg_income) if avg_income is not None else 0.0
+    def _get_total_income(self, user):
+        return Income.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0.0
 
-    def _get_average_monthly_expenses(self, user):
-        end_date = timezone.now()
-        start_date = end_date - timedelta(days=365)
-        avg_expenses = Expense.objects.filter(user=user, date__range=[start_date, end_date]).aggregate(Avg('amount'))['amount__avg']
-        return float(avg_expenses) if avg_expenses is not None else 0.0
+    def _get_total_expenses(self, user):
+        return Expense.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0.0
 
     def _is_financially_healthy(self, user):
         profile = user.profile
-        income = self._get_average_monthly_income(user)
-        expenses = self._get_average_monthly_expenses(user)
+        income = self._get_total_income(user)
+        expenses = self._get_total_expenses(user)
         savings_rate = (income - expenses) / income if income > 0 else 0
         return savings_rate > 0.2 and float(profile.cash_flow) > 0 and float(profile.net_worth) > 0
+
 
 
 class SmartBudgetRecommendationModel:
@@ -86,8 +81,8 @@ class SmartBudgetRecommendationModel:
             except Exception as e:
                 print(f"Error processing user {user.id}: {str(e)}")
 
-        X = np.array(X)
-        y = np.array(y)
+        X = np.array(X, dtype=np.float32)
+        y = np.array(y, dtype=np.float32)
 
         self.model.fit(X, y, epochs=200, batch_size=32, validation_split=0.2, verbose=1)
 
@@ -108,7 +103,7 @@ class SmartBudgetRecommendationModel:
 
         # Ensure all features are scalars
         X = np.array([[float(expected_income), float(last_month_expense), float(net_worth),
-                    float(cash_flow), float(total_spending), float(active_budget)]])
+                    float(cash_flow), float(total_spending), float(active_budget)]], dtype=np.float32)
 
         recommended_budget = self.model.predict(X)[0][0]
 
@@ -140,14 +135,14 @@ class SmartBudgetRecommendationModel:
                 active_budget = self._get_active_budget(user)
 
                 features.append([
-                    monthly_incomes[month],
-                    last_month_expense,
-                    net_worth,
-                    cash_flow,
-                    total_spending,
-                    active_budget
+                    float(monthly_incomes[month]),
+                    float(last_month_expense),
+                    float(net_worth),
+                    float(cash_flow),
+                    float(total_spending),
+                    float(active_budget)
                 ])
-                target.append(monthly_expenses[month])
+                target.append(float(monthly_expenses[month]))
 
         return features, target
 
@@ -155,7 +150,7 @@ class SmartBudgetRecommendationModel:
         monthly = {}
         for trans in transactions:
             month = trans.date.replace(day=1)
-            monthly[month] = monthly.get(month, 0) + trans.amount
+            monthly[month] = monthly.get(month, 0) + float(trans.amount)
         return monthly
 
     def _get_last_month_expense(self, user):
@@ -193,15 +188,12 @@ class PredictiveInsightsModel:
         self.model.fit(X, y, epochs=200, batch_size=32, validation_split=0.2, verbose=1)
 
     def predict(self, user):
-        expenses = self._get_recent_expenses(user)
-        if len(expenses) < 30:
-            raise ValueError(f"Not enough data for prediction. Need at least 30 days, but got {len(expenses)} days.")
-
-        X = np.array(expenses[-30:]).reshape(1, 30, 1)
+        current_month_expenses = self._get_current_month_expenses(user)
+        X = np.array(current_month_expenses).reshape(1, len(current_month_expenses), 1)
         prediction = self.model.predict(X)[0][0]
 
         return {
-            'predicted_expense': prediction,
+            'predicted_total_expense': prediction,
             'confidence_interval': self._calculate_confidence_interval(user, prediction)
         }
 
@@ -210,8 +202,13 @@ class PredictiveInsightsModel:
         X, y = [], []
         for i in range(len(expenses) - 30):
             X.append(expenses[i:i+30])
-            y.append(expenses[i+30])
+            y.append(sum(expenses[i+30:i+60]))  # Predicting the total for the next month
         return np.array(X), np.array(y)
+
+    def _get_current_month_expenses(self, user):
+        current_month = timezone.now().replace(day=1)
+        expenses = Expense.objects.filter(user=user, date__gte=current_month).order_by('date')
+        return [float(expense.amount) for expense in expenses]
 
     def _get_recent_expenses(self, user):
         end_date = timezone.now()

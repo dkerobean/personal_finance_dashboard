@@ -1,25 +1,20 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .tf_models import ExpensePredictionModel, FinancialHealthScoreModel, SmartBudgetRecommendationModel, PredictiveInsightsModel, ExpenseCategorizationModel
+from .tf_models import (FinancialHealthScoreModel,
+                        SmartBudgetRecommendationModel,
+                        PredictiveInsightsModel)
 from rest_framework.permissions import IsAuthenticated
-from user.models import Income, Expense, NetWorth, CustomUser
-from datetime import datetime, timedelta
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Avg
 import numpy as np
 
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.cache import cache
+from django.db import transaction
+from user.models import Income
 
-class ExpensePredictionView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        model = ExpensePredictionModel()
-
-        try:
-            prediction = model.predict(user)
-            return Response({'prediction': prediction.tolist()})
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
 
 class FinancialHealthScoreView(APIView):
     permission_classes = [IsAuthenticated]
@@ -27,11 +22,11 @@ class FinancialHealthScoreView(APIView):
     def get(self, request):
         user = request.user
         model = FinancialHealthScoreModel()
-
-        model.train([user])
-
-        health_score = model.predict_health_score(user)
-        return Response({"financial_health_score": health_score})
+        try:
+            score = model.predict_health_score(user)
+            return Response({'financial_health_score': score}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SmartBudgetRecommendationView(APIView):
@@ -39,14 +34,37 @@ class SmartBudgetRecommendationView(APIView):
 
     def get(self, request):
         user = request.user
-        model = SmartBudgetRecommendationModel()
-        expected_income = float(request.query_params.get('expected_income', 0))
 
         try:
-            recommendation = model.recommend_budget(user, expected_income)
-            return Response({'recommendation': recommendation})
+            # Calculate expected income based on average of last 3 months
+            expected_income = self.calculate_expected_income(user)
+
+            # Ensure expected_income is passed as a NumPy array
+            expected_income_array = np.array([expected_income])
+
+            model = SmartBudgetRecommendationModel()
+            recommendation = model.recommend_budget(user, expected_income_array)
+
+            # Add the calculated expected income to the response
+            recommendation['expected_income'] = expected_income
+
+            return Response(recommendation, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=500)
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def calculate_expected_income(self, user):
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=90)  # Last 3 months
+
+        avg_income = Income.objects.filter(
+            user=user,
+            date__range=[start_date, end_date]
+        ).aggregate(Avg('amount'))['amount__avg']
+
+        if avg_income is None:
+            raise ValueError("No income data available for the last 3 months")
+
+        return float(avg_income)
 
 
 class PredictiveInsightsView(APIView):
@@ -55,29 +73,10 @@ class PredictiveInsightsView(APIView):
     def get(self, request):
         user = request.user
         model = PredictiveInsightsModel()
-
         try:
             prediction = model.predict(user)
-            return Response({'prediction': prediction.tolist()})
+            return Response(prediction, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=500)
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TrainAllModelsView(APIView):
-    def post(self, request, *args, **kwargs):
-        user = request.user  # Assumes the user is authenticated and provided
-
-        # Initialize models
-        expense_categorization_model = ExpenseCategorizationModel()
-        predictive_insights_model = PredictiveInsightsModel()
-        smart_budget_recommendation_model = SmartBudgetRecommendationModel()
-
-        try:
-            # Train each model
-            expense_categorization_model.train(user)
-            predictive_insights_model.train(user)
-            smart_budget_recommendation_model.train(user)
-        except Exception as e:
-            return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        return Response({'status': 'success', 'message': 'All models trained successfully.'}, status=status.HTTP_200_OK)

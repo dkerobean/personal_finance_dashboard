@@ -20,9 +20,9 @@ class TrainAllModelsView(APIView):
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 # Train models concurrently
                 futures = [
-                    executor.submit(self.train_financial_health_score_model, users),
-                    executor.submit(self.train_smart_budget_recommendation_model, users),
-                    executor.submit(self.train_predictive_insights_model, users)
+                    executor.submit(self.train_financial_health_score_model, users), # noqa
+                    executor.submit(self.train_smart_budget_recommendation_model, users), # noqa
+                    executor.submit(self.train_predictive_insights_model, users)  # noqa
                 ]
 
                 # Wait for all futures to complete
@@ -30,9 +30,11 @@ class TrainAllModelsView(APIView):
                     if future.exception() is not None:
                         raise future.exception()
 
-            return Response({'message': 'All models trained successfully'}, status=status.HTTP_200_OK)
+            return Response({'message': 'All models trained successfully'},
+                            status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def train_financial_health_score_model(self, users):
         model = FinancialHealthScoreModel()

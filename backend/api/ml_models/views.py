@@ -9,10 +9,6 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Avg
 import numpy as np
-
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.cache import cache
-from django.db import transaction
 from user.models import Income
 
 
@@ -24,9 +20,11 @@ class FinancialHealthScoreView(APIView):
         model = FinancialHealthScoreModel()
         try:
             score = model.predict_health_score(user)
-            return Response({'financial_health_score': score}, status=status.HTTP_200_OK)
+            return Response({'financial_health_score': score},
+                            status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class SmartBudgetRecommendationView(APIView):
@@ -43,14 +41,15 @@ class SmartBudgetRecommendationView(APIView):
             expected_income_array = np.array([expected_income])
 
             model = SmartBudgetRecommendationModel()
-            recommendation = model.recommend_budget(user, expected_income_array)
+            recommendation = model.recommend_budget(user, expected_income_array) # noqa
 
             # Add the calculated expected income to the response
             recommendation['expected_income'] = expected_income
 
             return Response(recommendation, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def calculate_expected_income(self, user):
         end_date = timezone.now()
@@ -77,6 +76,5 @@ class PredictiveInsightsView(APIView):
             prediction = model.predict(user)
             return Response(prediction, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)

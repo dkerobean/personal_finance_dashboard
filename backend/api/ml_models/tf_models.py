@@ -1,10 +1,10 @@
-import tensorflow as tf
+import tensorflow as tf  # noqa
 from tensorflow import keras
 import numpy as np
 from django.db.models import Sum, Avg
 from django.utils import timezone
-from datetime import datetime, timedelta
-from user.models import CustomUser, Profile, Income, Expense, Budget
+from datetime import datetime, timedelta # noqa
+from user.models import Income, Expense, Budget
 
 
 class FinancialHealthScoreModel:
@@ -15,7 +15,8 @@ class FinancialHealthScoreModel:
             keras.layers.Dense(32, activation='relu'),
             keras.layers.Dense(1, activation='sigmoid')
         ])
-        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        self.model.compile(optimizer='adam', loss='binary_crossentropy',
+                           metrics=['accuracy'])
 
     def train(self, users):
         X, y = [], []
@@ -28,37 +29,57 @@ class FinancialHealthScoreModel:
                 print(f"Error processing user {user.id}: {str(e)}")
 
         X = np.array(X, dtype=np.float32)
+        X = self._normalize(X)
+
         y = np.array(y, dtype=np.float32)
 
-        self.model.fit(X, y, epochs=200, batch_size=32, validation_split=0.2, verbose=1)
+        self.model.fit(X, y, epochs=200, batch_size=32,
+                       validation_split=0.2, verbose=1)
 
     def predict_health_score(self, user):
         features = self._extract_features(user)
-        return float(self.model.predict(np.array([features], dtype=np.float32))[0][0])
+        features = self._normalize([features])
+        return float(self.model.predict(np.array(features, dtype=np.float32))[0][0]) # noqa
 
     def _extract_features(self, user):
         profile = user.profile
-        income = float(self._get_total_income(user))
-        expenses = float(self._get_total_expenses(user))
+        income = float(self._get_average_monthly_income(user))
+        expenses = float(self._get_average_monthly_expenses(user))
         savings_rate = (income - expenses) / income if income > 0 else 0
         net_worth = float(profile.net_worth)
         cash_flow = float(profile.cash_flow)
         total_spending = float(profile.total_spending)
-        return [income, expenses, savings_rate, net_worth, cash_flow, total_spending]
+        return [income, expenses, savings_rate,
+                net_worth, cash_flow, total_spending]
 
-    def _get_total_income(self, user):
-        return Income.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0.0
+    def _get_average_monthly_income(self, user):
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=365)
+        avg_income = Income.objects.filter(user=user,
+                                           date__range=[start_date, end_date]).aggregate(Avg('amount'))['amount__avg'] # noqa
+        return float(avg_income) if avg_income is not None else 0.0
 
-    def _get_total_expenses(self, user):
-        return Expense.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0.0
+    def _get_average_monthly_expenses(self, user):
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=365)
+        avg_expenses = Expense.objects.filter(user=user, date__range=[start_date, end_date]).aggregate(Avg('amount'))['amount__avg'] # noqa
+        return float(avg_expenses) if avg_expenses is not None else 0.0
 
     def _is_financially_healthy(self, user):
         profile = user.profile
-        income = self._get_total_income(user)
-        expenses = self._get_total_expenses(user)
+        income = self._get_average_monthly_income(user)
+        expenses = self._get_average_monthly_expenses(user)
         savings_rate = (income - expenses) / income if income > 0 else 0
-        return savings_rate > 0.2 and float(profile.cash_flow) > 0 and float(profile.net_worth) > 0
+        return savings_rate > 0.2 and float(profile.cash_flow) > 0 and float(profile.net_worth) > 0 # noqa
 
+    def _normalize(self, data):
+        """Normalize the features to range between 0 and 1"""
+        data = np.array(data, dtype=np.float32)
+        min_vals = data.min(axis=0)
+        max_vals = data.max(axis=0)
+        range_vals = max_vals - min_vals
+        range_vals[range_vals == 0] = 1  # Prevent division by zero
+        return (data - min_vals) / range_vals
 
 
 class SmartBudgetRecommendationModel:
@@ -69,7 +90,8 @@ class SmartBudgetRecommendationModel:
             keras.layers.Dense(32, activation='relu'),
             keras.layers.Dense(1)
         ])
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
+        self.model.compile(optimizer='adam', loss='mean_squared_error',
+                           metrics=['mae'])
 
     def train(self, users):
         X, y = [], []
@@ -84,7 +106,8 @@ class SmartBudgetRecommendationModel:
         X = np.array(X, dtype=np.float32)
         y = np.array(y, dtype=np.float32)
 
-        self.model.fit(X, y, epochs=200, batch_size=32, validation_split=0.2, verbose=1)
+        self.model.fit(X, y, epochs=200, batch_size=32,
+                       validation_split=0.2, verbose=1)
 
     def recommend_budget(self, user, expected_income):
         last_month_expense = self._get_last_month_expense(user)
@@ -94,16 +117,18 @@ class SmartBudgetRecommendationModel:
         active_budget = self._get_active_budget(user)
 
         # Debugging: print each feature to check their types
-        print(f"expected_income: {expected_income}, type: {type(expected_income)}")
-        print(f"last_month_expense: {last_month_expense}, type: {type(last_month_expense)}")
+        print(f"expected_income: {expected_income}, type: {type(expected_income)}") # noqa
+        print(f"last_month_expense: {last_month_expense}, type: {type(last_month_expense)}") # noqa
         print(f"net_worth: {net_worth}, type: {type(net_worth)}")
         print(f"cash_flow: {cash_flow}, type: {type(cash_flow)}")
-        print(f"total_spending: {total_spending}, type: {type(total_spending)}")
+        print(f"total_spending: {total_spending}, type: {type(total_spending)}") # noqa
         print(f"active_budget: {active_budget}, type: {type(active_budget)}")
 
         # Ensure all features are scalars
-        X = np.array([[float(expected_income), float(last_month_expense), float(net_worth),
-                    float(cash_flow), float(total_spending), float(active_budget)]], dtype=np.float32)
+        X = np.array([[float(expected_income), float(last_month_expense),
+                       float(net_worth), float(cash_flow),
+                       float(total_spending), float(active_budget)]],
+                     dtype=np.float32)
 
         recommended_budget = self.model.predict(X)[0][0]
 
@@ -118,8 +143,10 @@ class SmartBudgetRecommendationModel:
     def _prepare_data(self, user):
         end_date = timezone.now()
         start_date = end_date - timedelta(days=365)
-        expenses = Expense.objects.filter(user=user, date__range=[start_date, end_date])
-        incomes = Income.objects.filter(user=user, date__range=[start_date, end_date])
+        expenses = Expense.objects.filter(user=user,
+                                          date__range=[start_date, end_date])
+        incomes = Income.objects.filter(user=user,
+                                        date__range=[start_date, end_date])
 
         monthly_expenses = self._aggregate_monthly(expenses)
         monthly_incomes = self._aggregate_monthly(incomes)
@@ -155,10 +182,12 @@ class SmartBudgetRecommendationModel:
 
     def _get_last_month_expense(self, user):
         last_month = timezone.now().replace(day=1) - timedelta(days=1)
-        return Expense.objects.filter(user=user, date__month=last_month.month, date__year=last_month.year).aggregate(Sum('amount'))['amount__sum'] or 0
+        return Expense.objects.filter(user=user, date__month=last_month.month,
+                                      date__year=last_month.year).aggregate(Sum('amount'))['amount__sum'] or 0 # noqa
 
     def _get_active_budget(self, user):
-        active_budget = Budget.objects.filter(user=user, is_active=True).first()
+        active_budget = Budget.objects.filter(user=user,
+                                              is_active=True).first()
         return float(active_budget.target_amount) if active_budget else 0
 
 
@@ -170,7 +199,8 @@ class PredictiveInsightsModel:
             keras.layers.Dense(16, activation='relu'),
             keras.layers.Dense(1)
         ])
-        self.model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
+        self.model.compile(optimizer='adam', loss='mean_squared_error',
+                           metrics=['mae'])
 
     def train(self, users):
         X, y = [], []
@@ -185,16 +215,17 @@ class PredictiveInsightsModel:
         X = np.array(X)
         y = np.array(y)
 
-        self.model.fit(X, y, epochs=200, batch_size=32, validation_split=0.2, verbose=1)
+        self.model.fit(X, y, epochs=200, batch_size=32,
+                       validation_split=0.2, verbose=1)
 
     def predict(self, user):
         current_month_expenses = self._get_current_month_expenses(user)
-        X = np.array(current_month_expenses).reshape(1, len(current_month_expenses), 1)
+        X = np.array(current_month_expenses).reshape(1, len(current_month_expenses), 1) # noqa
         prediction = self.model.predict(X)[0][0]
 
         return {
             'predicted_total_expense': prediction,
-            'confidence_interval': self._calculate_confidence_interval(user, prediction)
+            'confidence_interval': self._calculate_confidence_interval(user, prediction) # noqa
         }
 
     def _prepare_data(self, user):
@@ -202,18 +233,20 @@ class PredictiveInsightsModel:
         X, y = [], []
         for i in range(len(expenses) - 30):
             X.append(expenses[i:i+30])
-            y.append(sum(expenses[i+30:i+60]))  # Predicting the total for the next month
+            y.append(sum(expenses[i+30:i+60]))
         return np.array(X), np.array(y)
 
     def _get_current_month_expenses(self, user):
         current_month = timezone.now().replace(day=1)
-        expenses = Expense.objects.filter(user=user, date__gte=current_month).order_by('date')
+        expenses = Expense.objects.filter(user=user,
+                                          date__gte=current_month).order_by('date') # noqa
         return [float(expense.amount) for expense in expenses]
 
     def _get_recent_expenses(self, user):
         end_date = timezone.now()
         start_date = end_date - timedelta(days=365)
-        expenses = Expense.objects.filter(user=user, date__range=[start_date, end_date]).order_by('date')
+        expenses = Expense.objects.filter(user=user,
+                                          date__range=[start_date, end_date]).order_by('date') # noqa
         return [float(expense.amount) for expense in expenses]
 
     def _calculate_confidence_interval(self, user, prediction):

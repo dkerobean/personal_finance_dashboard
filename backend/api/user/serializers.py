@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Profile, Message
+from .models import CustomUser, Profile, Message, FeedBack
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -72,3 +72,9 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['id', 'content', 'is_read', 'created_at']
+
+
+class FeedBackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedBack
+        fields = ['rating', 'comment', 'created_at']

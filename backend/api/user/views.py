@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (RegistrationSerializer, UserProfileSerializer,
-                          MessageSerializer)
+                          MessageSerializer, FeedBackSerializer)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import IsAuthenticated
@@ -65,3 +65,14 @@ class UserMessageView(APIView):
         message = Message.objects.filter(user=request.user)
         serializer = MessageSerializer(message, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class FeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = FeedBackSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -236,3 +236,12 @@ class NetWorth(models.Model):
         net_worth = total_income - total_expenses
         net_worth_record = cls.objects.create(user=user, net_worth=net_worth)
         return net_worth_record
+
+
+class FeedBack(models.Model):
+    rating = models.PositiveIntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        return f"Feedback {self.id} - Rating: {self.rating}"

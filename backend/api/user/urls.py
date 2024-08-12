@@ -15,4 +15,6 @@ urlpatterns = [
     path('profile/view/', views.UserProfileView.as_view(), name='user_profile'), # noqa
 
     path('messages/', views.UserMessageView.as_view(), name='user-messages'), # noqa
+
+    path('feedback/', views.FeedbackView.as_view(), name='feedback')
 ]

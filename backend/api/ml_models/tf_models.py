@@ -39,7 +39,8 @@ class FinancialHealthScoreModel:
     def predict_health_score(self, user):
         features = self._extract_features(user)
         features = self._normalize([features])
-        return float(self.model.predict(np.array(features, dtype=np.float32))[0][0]) # noqa
+        return float(self.model.predict(np.array(features,
+                                                 dtype=np.float32))[0][0])
 
     def _extract_features(self, user):
         profile = user.profile
@@ -186,8 +187,7 @@ class SmartBudgetRecommendationModel:
                                       date__year=last_month.year).aggregate(Sum('amount'))['amount__sum'] or 0 # noqa
 
     def _get_active_budget(self, user):
-        active_budget = Budget.objects.filter(user=user,
-                                              is_active=True).first()
+        active_budget = Budget.objects.filter(user=user, is_active=True).first() # noqa
         return float(active_budget.target_amount) if active_budget else 0
 
 

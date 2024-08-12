@@ -6,4 +6,5 @@ exclude =
     settings.py,
     urls.py,
     apps.py,
+    /api
     __pycache__

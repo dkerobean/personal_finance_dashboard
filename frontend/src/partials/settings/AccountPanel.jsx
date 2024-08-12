@@ -191,7 +191,7 @@ function AccountPanel({ profile }) {
         </section>
 
         {/* Smart Sync */}
-        <section>
+        {/* <section>
           <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Smart Sync update for Mac</h2>
           <div className="text-sm">With this update, online-only files will no longer appear to take up hard drive space.</div>
           <div className="flex items-center mt-5">
@@ -204,7 +204,7 @@ function AccountPanel({ profile }) {
             </div>
             <div className="text-sm text-slate-400 italic ml-2">{sync ? 'On' : 'Off'}</div>
           </div>
-        </section>
+        </section> */}
       </div>
 
       {/* Panel footer */}

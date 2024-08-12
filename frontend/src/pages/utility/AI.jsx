@@ -34,7 +34,7 @@ function Predictions() {
           recommendationResponse.json()
         ]);
 
-        setFinancialHealthScore(scoreData.financial_health_score);
+        setFinancialHealthScore(scoreData);
         setPredictiveInsights(insightsData);
         setBudgetRecommendation(recommendationData);
       } catch (error) {
@@ -51,21 +51,8 @@ function Predictions() {
     return 'bg-red-500';
   };
 
-  const renderConfidenceInterval = (interval) => {
-    const [lower, upper] = interval;
-    return (
-      <div className="mt-4">
-        <p className="text-sm text-slate-600">We are confident that your total expenses will be between:</p>
-        <div className="flex justify-between mt-2">
-          <span className="text-lg font-medium text-red-500">${lower.toFixed(2)}</span>
-          <span className="text-lg font-medium text-green-500">${upper.toFixed(2)}</span>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
@@ -85,46 +72,29 @@ function Predictions() {
             </div>
 
             <div className="border-t border-slate-200">
-              <div className="max-w-3xl mx-auto mt-16 space-y-12">
+              <div className="max-w-2xl m-auto mt-16">
 
                 {/* Financial Health Score */}
-                <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                <div className="text-center px-4 mb-8">
                   <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${getHealthScoreColor(financialHealthScore)} mb-4`}>
                     <svg className="w-10 h-10 fill-current text-white" viewBox="0 0 24 24">
                       <path d="M12 4a8 8 0 11-8 8 8 8 0 018-8m0-2a10 10 0 1010 10A10 10 0 0012 2zm0 15a5 5 0 01-5-5h2a3 3 0 006 0h2a5 5 0 01-5 5z" />
                     </svg>
                   </div>
                   <h2 className="text-2xl text-slate-800 font-bold mb-2">Financial Health Score</h2>
-                  <p className="text-lg text-gray-700">
-                    {financialHealthScore !== null ? `${(financialHealthScore * 100).toFixed(0)}%` : 'Loading...'}
-                  </p>
+                  <div className="text-lg">{financialHealthScore ? `${(financialHealthScore * 100).toFixed(0)}%` : 'Loading...'}</div>
                 </div>
 
                 {/* Predictive Insights */}
-                <div className="bg-white p-6 rounded-lg shadow-md text-center">
-                  <h2 className="text-2xl text-slate-800 font-bold mb-4">Predictive Insights</h2>
-                  <p className="text-lg text-gray-700">
-                    {predictiveInsights ? (
-                      <>
-                        <p><strong>Predicted Total Expense:</strong> ${predictiveInsights.predicted_total_expense.toFixed(2)}</p>
-                        {renderConfidenceInterval(predictiveInsights.confidence_interval)}
-                      </>
-                    ) : 'Loading...'}
-                  </p>
+                <div className="text-center px-4 mb-8">
+                  <h2 className="text-2xl text-slate-800 font-bold mb-2">Predictive Insights</h2>
+                  <div className="text-lg">{predictiveInsights ? predictiveInsights.summary : 'Loading...'}</div>
                 </div>
 
                 {/* Budget Recommendation */}
-                <div className="bg-white p-6 rounded-lg shadow-md text-center">
-                  <h2 className="text-2xl text-slate-800 font-bold mb-4">Budget Recommendation</h2>
-                  <p className="text-lg text-gray-700">
-                    {budgetRecommendation ? (
-                      <>
-                        <p><strong>Recommended Total Budget:</strong> ${budgetRecommendation.recommended_total_budget.toFixed(2)}</p>
-                        <p><strong>Total Spending:</strong> ${budgetRecommendation.total_spending.toFixed(2)}</p>
-                        <p><strong>Expected Income:</strong> ${budgetRecommendation.expected_income.toFixed(2)}</p>
-                      </>
-                    ) : 'Loading...'}
-                  </p>
+                <div className="text-center px-4 mb-8">
+                  <h2 className="text-2xl text-slate-800 font-bold mb-2">Budget Recommendation</h2>
+                  <div className="text-lg">{budgetRecommendation ? budgetRecommendation.recommendation : 'Loading...'}</div>
                 </div>
 
               </div>
